@@ -71,6 +71,15 @@ public class BreadthFirstSearch {
 		public String toString() {
 			return resourceURI;
 		}
+
+		/**
+		 * Returns the name of the entity (not the resource string)
+		 * @return
+		 */
+		public String resourceName() {
+			final int idx = "http://dbpedia.org/resource/".length();
+			return resourceURI.substring(idx).replace("_", " ");
+		}
 	}
 	
 	/**
@@ -79,9 +88,9 @@ public class BreadthFirstSearch {
 	 *
 	 */
 	public static class Edge implements Serializable {
-		Node source;
-		Node dest;
-		String connectionName;
+		public final Node source;
+		public final Node dest;
+		public final String connectionName;
 		
 		public Edge(Node source, String connection, Node dest) {
 			this.source = source;
@@ -93,6 +102,11 @@ public class BreadthFirstSearch {
 		public String toString() {
 			return source + "	" + connectionName + "	" + dest;
 		}
+
+		public Object getName() {
+			final int idx = "http://dbpedia.org/property/".length();
+			return connectionName.substring(idx).replace("_", " ");
+		}
 	}
 	
 	/**
@@ -103,10 +117,12 @@ public class BreadthFirstSearch {
 	public static class ResultSet implements Serializable {
 		public final List<Node> nodes;
 		public final List<Edge> edges;
+		public final List<Node> requestNodes;
 		
-		protected ResultSet(List<Node> nodes, List<Edge> edges) {
+		protected ResultSet(List<Node> nodes, List<Edge> edges, List<Node> requestNodes) {
 			this.nodes = nodes;
 			this.edges = edges;
+			this.requestNodes = requestNodes;
 		}
 
 		public void printTo(PrintStream out) {
@@ -144,6 +160,17 @@ public class BreadthFirstSearch {
 	// cache
 	protected final FileCache<AnalysedNode> cache = new FileCache<AnalysedNode>("DBPedia.BreadthFirstSearch");
 	
+	
+	/**
+	 * Gets all concepts/links that interconnect the given concepts
+	 * Notice: the output gets cached to disk
+	 * @param resourceURIs
+	 * @return
+	 */
+	public ResultSet getConnections(List<String> resourceURIs, int maxDepth) {
+		return getConnections(resourceURIs, (byte) maxDepth);
+	}
+	
 	/**
 	 * Gets all concepts/links that interconnect the given concepts
 	 * Notice: the output gets cached to disk
@@ -168,6 +195,9 @@ public class BreadthFirstSearch {
 		for(String res : resourceURIs) {
 			unseenNodes.add(new Node(res));
 		}
+		// save start nodes
+		ArrayList<Node> requestNodes = new ArrayList<Node>(unseenNodes);
+		
 		// start searching every node for adjacent nodes
 		while(!unseenNodes.isEmpty()) {
 			Node n = unseenNodes.pop();
@@ -186,7 +216,7 @@ public class BreadthFirstSearch {
 			seenNodes.put(n.resourceURI, n);
 		}
 		ArrayList<Node> finalNodes = new ArrayList<Node>(seenNodes.values());
-		ResultSet res = new ResultSet(finalNodes, edges);
+		ResultSet res = new ResultSet(finalNodes, edges, requestNodes);
 		
 		// output statistics
 		double pastTime = System.currentTimeMillis() - startTime;
