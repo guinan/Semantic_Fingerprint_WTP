@@ -1,3 +1,5 @@
+import graph.WTPGraph;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -21,6 +23,13 @@ public class MainClass {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		WTPGraph graph = new WTPGraph("Testgraph");
+		graph.addNode("Haskell");
+		graph.addNode("C");
+		graph.addNode("R");
+		graph.getGraph().addEdge("e1", "Haskell", "C");
+		graph.getGraph().addEdge("e2", "C", "R");
+		graph.display();
 	}
 	
 	/**
