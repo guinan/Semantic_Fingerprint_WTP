@@ -114,7 +114,14 @@ public class BreadthFirstSearch {
 			Collections.sort(edges, new Comparator<Edge>() {
 				@Override
 				public int compare(Edge o1, Edge o2) {
-					return Byte.compare(o1.source.depth, o2.source.depth);
+					byte b1 = o1.source.depth;
+					byte b2 = o2.source.depth;
+					if (b1 == b2)
+						return 0;
+					else if (b1 < b2)
+						return -1;
+					else
+						return 1;
 				}
 				
 			});

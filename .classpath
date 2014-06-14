@@ -16,5 +16,7 @@
 	<classpathentry kind="lib" path="apache-jena-lib/slf4j-log4j12-1.6.4.jar"/>
 	<classpathentry kind="lib" path="apache-jena-lib/xercesImpl-2.11.0.jar"/>
 	<classpathentry kind="lib" path="apache-jena-lib/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="lib" path="/Users/jensschn/Documents/workspace_eclipse/Semantic Fingerprint WTP/libs/gs-core-1.2.jar"/>
+	<classpathentry kind="lib" path="/Users/jensschn/Documents/workspace_eclipse/Semantic Fingerprint WTP/libs/gs-ui-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
