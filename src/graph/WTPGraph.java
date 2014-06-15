@@ -1,5 +1,13 @@
 package graph;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -9,6 +17,7 @@ import org.graphstream.ui.swingViewer.Viewer;
 
 public class WTPGraph {
 	private Graph graph;
+	private Map<String,String> requestNodes;
 	
 	protected final String styleSheet =
 	        "node {" +
@@ -24,7 +33,8 @@ public class WTPGraph {
 		graph = new SingleGraph(id);
 		graph.addAttribute("ui.quality");
 		graph.addAttribute("ui.antialias");
-		graph.addAttribute("ui.stylesheet", styleSheet);
+		String path = getClass().getClassLoader().getResource(".").getPath();
+		graph.addAttribute("ui.stylesheet", "url('file://"+path+"../css/style.css')");
 	}
 	
 	public Node addNode(String nodeId){
@@ -73,6 +83,9 @@ public class WTPGraph {
 		View view = viewer.getDefaultView();
 		view.resizeFrame(800, 600);
 		
+		
+		
+		
 		//view.setViewCenter(440000, 2503000, 0);
 		//view.setViewPercent(0.25);
 		
@@ -82,6 +95,52 @@ public class WTPGraph {
 	
 	public Graph getGraph(){
 		return graph;
+	}
+
+	public void deleteUnrelevantEdgesDFS(List<dbpedia.BreadthFirstSearch.Node> requestNodes) {
+		this.requestNodes = new HashMap<String, String>();
+		for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
+			this.requestNodes.put(temp.resourceName(), temp.resourceName());
+		}
+		for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
+			dfs(graph.getNode(temp.resourceName()), null);
+		}
+	}
+	private boolean dfs(Node actual, Node previous){
+		List<Edge> eToDelete = new LinkedList<Edge>();
+		List<Node> nToDelete = new LinkedList<Node>();
+		if(isRequestNode(actual) && previous != null)
+			return true;
+		boolean isConnector = false;
+		for (Edge edgeTemp : actual.getEachEdge()){
+			if(edgeTemp == null)
+				continue;
+			Node adjacentNode;	
+			if(edgeTemp.getNode0() == actual)
+				adjacentNode = edgeTemp.getNode1();
+			else
+				adjacentNode = edgeTemp.getNode0();
+			if(adjacentNode == previous)
+				continue;
+			if (!dfs(adjacentNode, actual)){
+				eToDelete.add(edgeTemp);
+				nToDelete.add(adjacentNode);
+				
+			}
+			else
+				isConnector = true;
+		}
+		for(Edge e : eToDelete)
+			graph.removeEdge(e);
+		for(Node n : nToDelete)
+			graph.removeNode(n);
+		return isConnector;
+	}
+	
+	private boolean isRequestNode(Node node){
+		if(requestNodes.get(node.getId()) == null)
+			return false;
+		return true;
 	}
 	
 	

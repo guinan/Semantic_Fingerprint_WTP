@@ -1,0 +1,8 @@
+node {
+	fill-color: black;
+	}
+	
+node.request {
+	fill-color: red;
+	text-color: red;
+	}

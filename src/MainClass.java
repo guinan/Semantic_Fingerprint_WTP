@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 import org.graphstream.graph.Edge;
+import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 
 import utils.FileCache;
@@ -18,6 +19,8 @@ public class MainClass {
 		LinkedList<String> request = new LinkedList<String>();
 		request.add("http://dbpedia.org/resource/Haskell_(programming_language)");
 		request.add("http://dbpedia.org/resource/C++");
+		
+		
 		
 		generateGraph(request);
 	}
@@ -64,29 +67,17 @@ public class MainClass {
 				//System.out.println("Node: " + e.toString());
 			}
 		}
-
+/*node {
+	fill-color: black;
+}*/
 		
 		// -- 4) tidy graph
-		// TODO: remove all nodes and edges that don't bridge the requested nodes
-		
-		for(Node n : graph.getGraph()) {
-//			for(Edge e : n.getEachEdge()) {
-//				if (e != null)
-//				graph.getGraph().removeEdge(e);
-//			}
-//			graph.getGraph().removeNode(n);
-			
-//			if (n.getEdgeSet().size() < 2) {
-//				graph.getGraph().removeNode(n);
-//			} else {
-//				System.out.println(n.getEdgeSet().size());
-//			}
-//			//
-		}
+		graph.deleteUnrelevantEdgesDFS(res.requestNodes);
 		
 
 		// -- 5) display graph
 		graph.display();
+		
 	}
 	
 	// ------------------ Cache Test
