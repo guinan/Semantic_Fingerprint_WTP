@@ -1,8 +1,6 @@
 package graph;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,7 +65,7 @@ public class WTPGraph {
 	
 	public void addEdge(String edgeId,String nodeId1, String nodeId2, String label){
 		Edge edgeTemp = graph.addEdge(edgeId, nodeId1, nodeId1);
-		//edgeTemp.addAttribute("ui.label", label);
+		edgeTemp.addAttribute("ui.label", label);
 	}
 	
 	public void addEdge(String nodeId1, String nodeId2){
