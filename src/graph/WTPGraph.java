@@ -122,98 +122,37 @@ public class WTPGraph {
 	 */
 	public void deleteUnrelevantEdgesDFS(List<dbpedia.BreadthFirstSearch.Node> requestNodes, int searchDepth) {
 		this.requestNodes = new HashMap<String, String>();
-		ArrayList<Node> requestNodess = new ArrayList<Node>();
 		// put request nodes into hashmap
 		for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
 			this.requestNodes.put(temp.resourceName(), temp.resourceName());
-			requestNodess.add(graph.getNode(temp.resourceName()));
 		}
 		// and start cleaning the graph
-		
 		for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
 			dfs(graph.getNode(temp.resourceName()), new LinkedList<Node>());
 		}
-		
-		//tidyGraph(requestNodess, searchDepth);
 	}
 	
 	/**
-	 * Does not work!
-	 * @param requestNodes
-	 * @param maxSearchDepth
-	 */
-	/*
-	private void tidyGraph(ArrayList<Node> requestNodes, int maxSearchDepth) {
-		APSP apsp = new APSP();
-        apsp.init(graph); // registering apsp as a sink for the graph
-        apsp.setDirected(false);
-        apsp.compute();
-        
-        // start deleting
-		List<Node> nToDelete = new LinkedList<Node>();
-        for(Node n : graph) {
-        	if (requestNodes.contains(n)) continue;
-        	
-        	// delete all nodes that do not reach at least to request nodes
-        	APSPInfo info = n.getAttribute(APSPInfo.ATTRIBUTE_NAME);
-        	int numHits = 0;
-        	LinkedList<Node> pathNodes = new LinkedList<Node>();
-        	for(Node target : requestNodes) {
-        		boolean ownPath = true;
-        		
-        		Path p = info.getShortestPathTo(target.getId()); // This Method is buggy
-        		Collection<Node> nodes = p.getNodeSet();
-        		// check whether the paths intersect
-        		for(Node np : nodes) {
-        			if (pathNodes.contains(np)) {
-        				ownPath = false;
-        				break;
-        			}
-        		}
-        		// if they do not count it as a valid path
-        		if (ownPath) {
-	    			numHits++;
-	    			if (numHits >= 2) {
-	    				break;
-	    			}
-	    			pathNodes.addAll(nodes);
-        		}
-        	}
-        	// delete that node if we didn't find at least to path that don't intersect
-        	if (numHits < 2) {
-        		nToDelete.add(n);
-        		// delete all edges
-        	}
-            
-        }
-        // delete what should be deleted
-		for(Node n : nToDelete)
-			graph.removeNode(n);
-	}*/
-	
-	/**
-	 * 
+	 * Tidys the graph using BreadthFirstSearch
 	 * @param requestNodes
 	 * @param visited nodes that have already been analysed (saves weather the node is a connector or not)
 	 */
-	
-	private void bfs(HashSet<Node> requestNodes, int maxDepth) {
-		// NOT IMPLEMENTED YET
+	public void tidyFast(List<dbpedia.BreadthFirstSearch.Node> requestedNodes, int maxDepth) {
+		HashSet<Node> requestNodes = new HashSet<Node>();
+		// put request nodes into hashmap
+		for(dbpedia.BreadthFirstSearch.Node temp : requestedNodes){
+			requestNodes.add(graph.getNode(temp.resourceName()));
+		}
 		
-		HashMap<Node, Boolean> visitedNodes = new HashMap<Node, Boolean>(); // saves visited nodes and wether the node is a linking node
 		// 1) init vars
 		int numRequestNodes = requestNodes.size();
-		int numListsEachNode = (maxDepth + 1);
-		ArrayList<HashSet<Node>> visited = new ArrayList<HashSet<Node>>(numRequestNodes * numListsEachNode);
-		int numLists = visited.size();
-		for(int i = 0; i < numLists; i++) {
-			visited.add(new HashSet<Node>());
-		}
+		BFS_Memory bfsMem = new BFS_Memory(numRequestNodes, maxDepth);
 		
 		// 2) fill the level 0 lists
 		int k = 0;
 		for(Node n : requestNodes) {
-			visited.get(k * numListsEachNode).add(n);
+			bfsMem.getList(k, 0).add(n);
+			bfsMem.visitedNodes.put(n, true);
 			k++;
 		}
 		
@@ -221,20 +160,38 @@ public class WTPGraph {
 		for (int level = 0; level < maxDepth; level++) {
 			for (int idxNode = 0; idxNode < numRequestNodes; idxNode++) {
 				// get all adjacent node for each node in this list
-				HashSet<Node> levelNodes = visited.get(idxNode * (level+1));
-				HashSet<Node> nextLevelNodes = visited.get(idxNode * (level+2));
+				HashSet<Node> lastNodes = (level == 0) ? new HashSet<Node>() : bfsMem.getList(idxNode, level-1);
+				HashSet<Node> levelNodes = bfsMem.getList(idxNode, level);
+				HashSet<Node> nextLevelNodes = bfsMem.getList(idxNode, level+1);
+				
 				for(Node n : levelNodes) {
+					//if (level != 0 && bfsMem.visitedNodes.get(n)) continue;
+					
 					Iterator<Node> neighborNodes = n.getNeighborNodeIterator();
 					while(neighborNodes.hasNext()) {
 						Node neighbour = neighborNodes.next();
 						// 3.1) check if we are going backwards to were we came from
+						if (lastNodes.contains(neighbour)) continue;
 						
-						// 3.2) check if the neighbour is already in any other list of the other start nodes
 						
-						// 3.3) if so mark it as linking node (and all other nodes from this node to the start as well)
+						// 3.2) add it to this list
+						if (!bfsMem.visitedNodes.containsKey(neighbour)) {
+							bfsMem.visitedNodes.put(neighbour, false);
+							nextLevelNodes.add(neighbour);
+						}
 						
-						// 3.4) add it to this list
-						nextLevelNodes.add(neighbour);
+						// 3.3) check if the neighbour is already in any other list of the other start nodes (than its a linking node)
+						boolean hasLinked = false;
+						for(int otherIdx = 0; otherIdx < numRequestNodes; otherIdx++) {
+							if (otherIdx == idxNode) continue;
+							boolean hasFoundLink = bfsMem.checkAndMark(otherIdx, neighbour);
+							if (hasFoundLink) hasLinked = true;
+						}
+						
+						// 3.4) if so mark it as linking node (and all other nodes from this node to the start as well)
+						if (hasLinked) {
+							bfsMem.markBackwarts(idxNode, level+1, neighbour);
+						}
 					}
 					
 				}
@@ -244,7 +201,7 @@ public class WTPGraph {
 		// 4) delete all nodes that have not been marked as linking nodes
 		List<Node> nToDelete = new LinkedList<Node>();
 		for(Node n : graph) {
-			if (!visitedNodes.get(n)) {
+			if (!bfsMem.visitedNodes.containsKey(n) || !bfsMem.visitedNodes.get(n)) { // bfsMem.visitedNodes.containsKey(n) because: when we delete edges small unconnected groups could remain
 				nToDelete.add(n);
 			}
 		}
@@ -252,6 +209,79 @@ public class WTPGraph {
 			graph.removeNode(n);
 		}
 		
+	}
+	
+	/**
+	 * Implements a Matrix
+	 *
+	 */
+	private class BFS_Memory {
+		public final HashMap<Node, Boolean> visitedNodes = new HashMap<Node, Boolean>(); // saves visited nodes and whether the node is a linking node
+		public final ArrayList<HashSet<Node>> visited; // saves the nodes for each level of the bfs from each startnode
+		public final int numRequestNodes;
+		public final int numListsEachNode;
+		public final int maxDepth;
+		
+		public BFS_Memory(int numRequestNodes, int maxDepth) {
+			this.maxDepth = maxDepth;
+			this.numListsEachNode = maxDepth + 1;
+			this.numRequestNodes = numRequestNodes;
+			int numLists = numRequestNodes * numListsEachNode;
+			visited = new ArrayList<HashSet<Node>>(numLists);
+			// init empty
+			for(int i = 0; i < numLists; i++) {
+				visited.add(new HashSet<Node>());
+			}
+		}
+		
+		/**
+		 * Mark
+		 * @param idx
+		 * @param node
+		 */
+		public void markBackwarts(int idx, int level, Node node) {
+			visitedNodes.put(node, true);
+			// mark all adjacent nodes
+			if (level > 1) {
+				HashSet<Node> nodesForNextLevel = getList(idx, level-1);
+				
+				Iterator<Node> neighborNodes = node.getNeighborNodeIterator();
+				while(neighborNodes.hasNext()) {
+					Node neighbour = neighborNodes.next();
+					if (nodesForNextLevel.contains(neighbour)) {
+						markBackwarts(idx, level-1, neighbour);
+					}
+				}
+			}
+			
+		}
+
+		/**
+		 * check if a node is conatined in the set of already reached nodes
+		 * @param idx
+		 * @param node
+		 * @return
+		 */
+		public boolean checkAndMark(int idx, Node node) {
+			for(int level = maxDepth; level >= 1; level--) { // dont check the level 0
+				HashSet<Node> nodesForLevel = getList(idx, level);
+				if (nodesForLevel.contains(node)) {
+					markBackwarts(idx, level, node);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/**
+		 * 
+		 * @param idx
+		 * @param level
+		 * @return
+		 */
+		public HashSet<Node> getList(int idx, int level) {
+			return visited.get(idx * numListsEachNode + level);
+		}
 	}
 	
 	
@@ -310,5 +340,55 @@ public class WTPGraph {
 	}
 	
 	
+	/**
+	 * 
+	 * @return
+	 */
+	public HashMap<String, Integer> getEdgeOccurenceMap() {
+		HashMap<String, Integer> stats = new HashMap<String, Integer>();
+		Iterator<Edge> eIt = graph.getEdgeIterator();
+		while(eIt.hasNext()) {
+			Edge e = eIt.next();
+			String key = e.getAttribute("ui.label");
+			Integer num = stats.get(key);
+			if (num == null) {
+				num = new Integer(1);
+			} else {
+				num++;
+			}
+			stats.put(key, num);
+		}
+		return stats;
+	}
 	
+	/**
+	 * 
+	 * @param name
+	 */
+	public void removeEdgesByName(String name) {
+		LinkedList<Edge> eToDelete = new LinkedList<Edge>();
+		Iterator<Edge> eIt = graph.getEdgeIterator();
+		while(eIt.hasNext()) {
+			Edge e = eIt.next();
+			String key = e.getAttribute("ui.label");
+			if (key.equals(name)) {
+				eToDelete.add(e);
+			}
+		}
+		// remove edges
+		for(Edge e : eToDelete) {
+			Node src = e.getSourceNode();
+			Node dest = e.getTargetNode();
+			graph.removeEdge(e);
+			// remove nodes without adjacent nodes
+			if (src.getDegree() == 0) {
+				graph.removeNode(src);
+			}
+			if (dest.getDegree() == 0) {
+				graph.removeNode(dest);
+			}
+		}
+		
+		
+	}
 }
