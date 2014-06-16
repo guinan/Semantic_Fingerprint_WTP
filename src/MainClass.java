@@ -33,7 +33,7 @@ public class MainClass {
 		// -- 1) get connections
 		System.out.println("Starting BFS...");
 		BreadthFirstSearch lc = new BreadthFirstSearch();
-		ResultSet res = lc.getConnections(request, 1);
+		ResultSet res = lc.getConnections(request, 2);
 		System.out.println("...Done");
 		
 		/*
