@@ -118,11 +118,13 @@ public class BreadthFirstSearch {
 		public final List<Node> nodes;
 		public final List<Edge> edges;
 		public final List<Node> requestNodes;
+		public final byte requestDepth;
 		
-		protected ResultSet(List<Node> nodes, List<Edge> edges, List<Node> requestNodes) {
+		protected ResultSet(List<Node> nodes, List<Edge> edges, List<Node> requestNodes, byte requestDepth) {
 			this.nodes = nodes;
 			this.edges = edges;
 			this.requestNodes = requestNodes;
+			this.requestDepth = requestDepth;
 		}
 
 		public void printTo(PrintStream out) {
@@ -216,7 +218,7 @@ public class BreadthFirstSearch {
 			seenNodes.put(n.resourceURI, n);
 		}
 		ArrayList<Node> finalNodes = new ArrayList<Node>(seenNodes.values());
-		ResultSet res = new ResultSet(finalNodes, edges, requestNodes);
+		ResultSet res = new ResultSet(finalNodes, edges, requestNodes, maxDepth);
 		
 		// output statistics
 		double pastTime = System.currentTimeMillis() - startTime;
