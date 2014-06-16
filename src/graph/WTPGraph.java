@@ -68,14 +68,29 @@ public class WTPGraph {
 		edgeTemp.addAttribute("ui.label", label);
 	}
 	
+	
+	/**
+	 * 
+	 * @param nodeId1
+	 * @param nodeId2
+	 */
 	public void addEdge(String nodeId1, String nodeId2){
 		graph.addEdge(nodeId1+"-"+nodeId2, nodeId1, nodeId1);
 	}
 	
+	
+	/**
+	 * 
+	 * @param graphD
+	 */
 	public static void display(WTPGraph graphD){
 		graphD.display();
 	}
 	
+	
+	/**
+	 * 
+	 */
 	public void display(){
 		Viewer viewer = graph.display(true);
 		View view = viewer.getDefaultView();
@@ -91,43 +106,66 @@ public class WTPGraph {
 		
 	}
 	
+	
+	/**
+	 * 
+	 * @return
+	 */
 	public Graph getGraph(){
 		return graph;
 	}
 
+	/**
+	 * 
+	 * @param requestNodes
+	 */
 	public void deleteUnrelevantEdgesDFS(List<dbpedia.BreadthFirstSearch.Node> requestNodes) {
 		this.requestNodes = new HashMap<String, String>();
+		// put request nodes into hashmap
 		for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
 			this.requestNodes.put(temp.resourceName(), temp.resourceName());
 		}
+		// and start cleaning the graph
 		for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
-			dfs(graph.getNode(temp.resourceName()), null);
+			dfs(graph.getNode(temp.resourceName()), new LinkedList<Node>());
 		}
 	}
-	private boolean dfs(Node actual, Node previous){
+	
+	/**
+	 * 
+	 * @param actual
+	 * @param previous
+	 * @return
+	 */
+	private boolean dfs(Node actual, LinkedList<Node> previous){
 		List<Edge> eToDelete = new LinkedList<Edge>();
 		List<Node> nToDelete = new LinkedList<Node>();
-		if(isRequestNode(actual) && previous != null)
+		// reached one of the request nodes
+		if(isRequestNode(actual) && !previous.isEmpty())
 			return true;
+		// check if the node connects two or more requested nodes
 		boolean isConnector = false;
 		for (Edge edgeTemp : actual.getEachEdge()){
-			if(edgeTemp == null)
-				continue;
+			if(edgeTemp == null) continue;
+			// get adjacent node
 			Node adjacentNode;	
 			if(edgeTemp.getNode0() == actual)
 				adjacentNode = edgeTemp.getNode1();
 			else
 				adjacentNode = edgeTemp.getNode0();
-			if(adjacentNode == previous)
-				continue;
-			if (!dfs(adjacentNode, actual)){
+			// never go backwards
+			if(previous.contains(adjacentNode)) continue;
+			// try to find a way from this adjacent node to a request node
+			previous.addLast(actual);
+			if (!dfs(adjacentNode, previous)){
 				eToDelete.add(edgeTemp);
 				nToDelete.add(adjacentNode);
-				
-			}
-			else
+			} else {
 				isConnector = true;
+			}
+			previous.removeLast();
 		}
+		// delete from the graph
 		for(Edge e : eToDelete)
 			graph.removeEdge(e);
 		for(Node n : nToDelete)
@@ -135,6 +173,12 @@ public class WTPGraph {
 		return isConnector;
 	}
 	
+	
+	/**
+	 * 
+	 * @param node
+	 * @return
+	 */
 	private boolean isRequestNode(Node node){
 		if(requestNodes.get(node.getId()) == null)
 			return false;
