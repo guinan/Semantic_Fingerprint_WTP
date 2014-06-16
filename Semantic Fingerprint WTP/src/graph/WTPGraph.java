@@ -2,19 +2,17 @@ package graph;
 
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import org.graphstream.algorithm.APSP;
-import org.graphstream.algorithm.APSP.APSPInfo;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
-import org.graphstream.graph.Path;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
@@ -201,9 +199,9 @@ public class WTPGraph {
 	
 	private void bfs(HashSet<Node> requestNodes, int maxDepth) {
 		// NOT IMPLEMENTED YET
-		/*
-		HashMap<Node, Integer> visitedNodes = new HashMap<Node, Integer>(); // saves which node was
-		// init vars
+		
+		HashMap<Node, Boolean> visitedNodes = new HashMap<Node, Boolean>(); // saves visited nodes and wether the node is a linking node
+		// 1) init vars
 		int numRequestNodes = requestNodes.size();
 		int numListsEachNode = (maxDepth + 1);
 		ArrayList<HashSet<Node>> visited = new ArrayList<HashSet<Node>>(numRequestNodes * numListsEachNode);
@@ -212,21 +210,48 @@ public class WTPGraph {
 			visited.add(new HashSet<Node>());
 		}
 		
-		// ------------ fill the level 0 lists
+		// 2) fill the level 0 lists
 		int k = 0;
 		for(Node n : requestNodes) {
 			visited.get(k * numListsEachNode).add(n);
 			k++;
 		}
 		
-		// fill the other lists and serach for connector nodes
-		for (int level = 0; level < numListsEachNode; level++) {
+		// 3) fill the other lists and serach for connector nodes
+		for (int level = 0; level < maxDepth; level++) {
 			for (int idxNode = 0; idxNode < numRequestNodes; idxNode++) {
 				// get all adjacent node for each node in this list
-				
+				HashSet<Node> levelNodes = visited.get(idxNode * (level+1));
+				HashSet<Node> nextLevelNodes = visited.get(idxNode * (level+2));
+				for(Node n : levelNodes) {
+					Iterator<Node> neighborNodes = n.getNeighborNodeIterator();
+					while(neighborNodes.hasNext()) {
+						Node neighbour = neighborNodes.next();
+						// 3.1) check if we are going backwards to were we came from
+						
+						// 3.2) check if the neighbour is already in any other list of the other start nodes
+						
+						// 3.3) if so mark it as linking node (and all other nodes from this node to the start as well)
+						
+						// 3.4) add it to this list
+						nextLevelNodes.add(neighbour);
+					}
+					
+				}
 			}
 		}
-		*/
+		
+		// 4) delete all nodes that have not been marked as linking nodes
+		List<Node> nToDelete = new LinkedList<Node>();
+		for(Node n : graph) {
+			if (!visitedNodes.get(n)) {
+				nToDelete.add(n);
+			}
+		}
+		for(Node n : nToDelete) {
+			graph.removeNode(n);
+		}
+		
 	}
 	
 	
