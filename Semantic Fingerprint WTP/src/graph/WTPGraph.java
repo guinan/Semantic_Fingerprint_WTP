@@ -2,6 +2,7 @@ package graph;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,6 +14,7 @@ import org.graphstream.algorithm.APSP.APSPInfo;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.Path;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
@@ -142,6 +144,7 @@ public class WTPGraph {
 	 * @param requestNodes
 	 * @param maxSearchDepth
 	 */
+	/*
 	private void tidyGraph(ArrayList<Node> requestNodes, int maxSearchDepth) {
 		APSP apsp = new APSP();
         apsp.init(graph); // registering apsp as a sink for the graph
@@ -149,7 +152,6 @@ public class WTPGraph {
         apsp.compute();
         
         // start deleting
-        List<Edge> eToDelete = new LinkedList<Edge>();
 		List<Node> nToDelete = new LinkedList<Node>();
         for(Node n : graph) {
         	if (requestNodes.contains(n)) continue;
@@ -157,16 +159,29 @@ public class WTPGraph {
         	// delete all nodes that do not reach at least to request nodes
         	APSPInfo info = n.getAttribute(APSPInfo.ATTRIBUTE_NAME);
         	int numHits = 0;
+        	LinkedList<Node> pathNodes = new LinkedList<Node>();
         	for(Node target : requestNodes) {
-        		//info.getShortestPathTo(target.getId());
-        		double len = info.getLengthTo(target.getId());
-        		if (len <= maxSearchDepth) {
-        			numHits++;
-        			if (numHits >= 2) {
+        		boolean ownPath = true;
+        		
+        		Path p = info.getShortestPathTo(target.getId()); // This Method is buggy
+        		Collection<Node> nodes = p.getNodeSet();
+        		// check whether the paths intersect
+        		for(Node np : nodes) {
+        			if (pathNodes.contains(np)) {
+        				ownPath = false;
         				break;
         			}
         		}
+        		// if they do not count it as a valid path
+        		if (ownPath) {
+	    			numHits++;
+	    			if (numHits >= 2) {
+	    				break;
+	    			}
+	    			pathNodes.addAll(nodes);
+        		}
         	}
+        	// delete that node if we didn't find at least to path that don't intersect
         	if (numHits < 2) {
         		nToDelete.add(n);
         		// delete all edges
@@ -174,11 +189,9 @@ public class WTPGraph {
             
         }
         // delete what should be deleted
-        /*for(Edge e : eToDelete)
-			graph.removeEdge(e); */
 		for(Node n : nToDelete)
 			graph.removeNode(n);
-	}
+	}*/
 	
 	/**
 	 * 
