@@ -19,8 +19,7 @@ public class MainClass {
 		LinkedList<String> request = new LinkedList<String>();
 		request.add("http://dbpedia.org/resource/Haskell_(programming_language)");
 		request.add("http://dbpedia.org/resource/C++");
-		
-		
+		//request.add("http://dbpedia.org/page/ML_(programming_language)"); According to RelFinder there should be a connection!
 		
 		generateGraph(request);
 	}
@@ -34,7 +33,7 @@ public class MainClass {
 		// -- 1) get connections
 		System.out.println("Starting BFS...");
 		BreadthFirstSearch lc = new BreadthFirstSearch();
-		ResultSet res = lc.getConnections(request, 2);
+		ResultSet res = lc.getConnections(request, 1);
 		System.out.println("...Done");
 		
 		/*
@@ -74,7 +73,7 @@ public class MainClass {
 		
 		// -- 4) tidy graph
 		System.out.print("Tidying graph ("+graph.getGraph().getEdgeCount()+" Edges)...");
-		graph.deleteUnrelevantEdgesDFS(res.requestNodes);
+		graph.deleteUnrelevantEdgesDFS(res.requestNodes, res.requestDepth);
 		System.out.println("Done ("+graph.getGraph().getEdgeCount()+" Edges left)");
 
 		// -- 5) display graph

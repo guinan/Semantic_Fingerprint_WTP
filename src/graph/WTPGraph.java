@@ -1,11 +1,15 @@
 package graph;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.graphstream.algorithm.APSP;
+import org.graphstream.algorithm.APSP.APSPInfo;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -96,9 +100,6 @@ public class WTPGraph {
 		View view = viewer.getDefaultView();
 		view.resizeFrame(800, 600);
 		
-		
-		
-		
 		//view.setViewCenter(440000, 2503000, 0);
 		//view.setViewPercent(0.25);
 		
@@ -119,17 +120,102 @@ public class WTPGraph {
 	 * 
 	 * @param requestNodes
 	 */
-	public void deleteUnrelevantEdgesDFS(List<dbpedia.BreadthFirstSearch.Node> requestNodes) {
+	public void deleteUnrelevantEdgesDFS(List<dbpedia.BreadthFirstSearch.Node> requestNodes, int searchDepth) {
 		this.requestNodes = new HashMap<String, String>();
+		ArrayList<Node> requestNodess = new ArrayList<Node>();
 		// put request nodes into hashmap
 		for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
 			this.requestNodes.put(temp.resourceName(), temp.resourceName());
+			requestNodess.add(graph.getNode(temp.resourceName()));
 		}
 		// and start cleaning the graph
+		
 		for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
 			dfs(graph.getNode(temp.resourceName()), new LinkedList<Node>());
 		}
+		
+		//tidyGraph(requestNodess, searchDepth);
 	}
+	
+	/**
+	 * Does not work!
+	 * @param requestNodes
+	 * @param maxSearchDepth
+	 */
+	private void tidyGraph(ArrayList<Node> requestNodes, int maxSearchDepth) {
+		APSP apsp = new APSP();
+        apsp.init(graph); // registering apsp as a sink for the graph
+        apsp.setDirected(false);
+        apsp.compute();
+        
+        // start deleting
+        List<Edge> eToDelete = new LinkedList<Edge>();
+		List<Node> nToDelete = new LinkedList<Node>();
+        for(Node n : graph) {
+        	if (requestNodes.contains(n)) continue;
+        	
+        	// delete all nodes that do not reach at least to request nodes
+        	APSPInfo info = n.getAttribute(APSPInfo.ATTRIBUTE_NAME);
+        	int numHits = 0;
+        	for(Node target : requestNodes) {
+        		//info.getShortestPathTo(target.getId());
+        		double len = info.getLengthTo(target.getId());
+        		if (len <= maxSearchDepth) {
+        			numHits++;
+        			if (numHits >= 2) {
+        				break;
+        			}
+        		}
+        	}
+        	if (numHits < 2) {
+        		nToDelete.add(n);
+        		// delete all edges
+        	}
+            
+        }
+        // delete what should be deleted
+        /*for(Edge e : eToDelete)
+			graph.removeEdge(e); */
+		for(Node n : nToDelete)
+			graph.removeNode(n);
+	}
+	
+	/**
+	 * 
+	 * @param requestNodes
+	 * @param visited nodes that have already been analysed (saves weather the node is a connector or not)
+	 */
+	
+	private void bfs(HashSet<Node> requestNodes, int maxDepth) {
+		// NOT IMPLEMENTED YET
+		/*
+		HashMap<Node, Integer> visitedNodes = new HashMap<Node, Integer>(); // saves which node was
+		// init vars
+		int numRequestNodes = requestNodes.size();
+		int numListsEachNode = (maxDepth + 1);
+		ArrayList<HashSet<Node>> visited = new ArrayList<HashSet<Node>>(numRequestNodes * numListsEachNode);
+		int numLists = visited.size();
+		for(int i = 0; i < numLists; i++) {
+			visited.add(new HashSet<Node>());
+		}
+		
+		// ------------ fill the level 0 lists
+		int k = 0;
+		for(Node n : requestNodes) {
+			visited.get(k * numListsEachNode).add(n);
+			k++;
+		}
+		
+		// fill the other lists and serach for connector nodes
+		for (int level = 0; level < numListsEachNode; level++) {
+			for (int idxNode = 0; idxNode < numRequestNodes; idxNode++) {
+				// get all adjacent node for each node in this list
+				
+			}
+		}
+		*/
+	}
+	
 	
 	/**
 	 * 
