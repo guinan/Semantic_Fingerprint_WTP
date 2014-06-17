@@ -6,3 +6,26 @@ node.request {
 	fill-color: red;
 	text-color: red;
 	}
+	
+edge {
+	fill-color: black;
+}
+edge.standard {
+	fill-color: black;
+}
+edge.one {
+	fill-color: red;
+}
+
+edge.two {
+	fill-color: blue;
+}
+edge.three {
+	fill-color: green;
+}
+edge.four {
+	fill-color: yellow;
+}
+edge.five {
+	fill-color: grey;
+}

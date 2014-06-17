@@ -391,4 +391,86 @@ public class WTPGraph {
 		
 		
 	}
+
+	public void colorizeDFS(List<dbpedia.BreadthFirstSearch.Node> requestNodes) {
+		this.requestNodes = new HashMap<String, String>();
+		// put request nodes into hashmap
+		for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
+			this.requestNodes.put(temp.resourceName(), temp.resourceName());
+		}
+		// and colorizing the graph
+		// works yet just for 1 start Node
+		//for(dbpedia.BreadthFirstSearch.Node temp : requestNodes){
+		//	dfs(graph.getNode(temp.resourceName()), new LinkedList<Node>());
+		//}
+		dfs2(graph.getNode(requestNodes.get(0).resourceName()), new HashMap<String,String>(),0);
+	}
+
+	private int dfs2(Node actual, HashMap<String, String> previous, int step) {
+
+		// reached one of the request nodes
+		if(isRequestNode(actual) && !previous.isEmpty())
+			// return the distance
+			return step;
+		// setting shortest Distance to "infinity"
+		int shortestDist = 100;
+		
+		for (Edge edgeTemp : actual.getEachEdge()){
+			if(edgeTemp == null) continue;
+			// get adjacent node
+			Node adjacentNode;	
+			if(edgeTemp.getNode0() == actual)
+				adjacentNode = edgeTemp.getNode1();
+			else
+				adjacentNode = edgeTemp.getNode0();
+			// never go backwards
+			if(previous.get(adjacentNode.getId())!=null) continue;
+			previous.put(actual.getId(),actual.getId());
+			// try to find a way from this adjacent node to a request node
+			int dist = dfs2(adjacentNode,previous,step+1);
+			previous.remove(actual.getId());
+			// check if already colored
+			String prevC = edgeTemp.getAttribute("col");
+			if(prevC != null){
+				// check which path was shorter and adjust color
+				if(Integer.parseInt(prevC) > dist){
+					edgeTemp.setAttribute("col", ""+dist);
+					edgeTemp.setAttribute("ui.class", getColor(dist));
+				}
+			}
+			// initial coloring for this edge
+			else{
+				edgeTemp.addAttribute("col", ""+dist);
+				edgeTemp.addAttribute("ui.class", getColor(dist));
+			}
+			
+			// return shortest distance from this node to the requested node
+			if(dist < shortestDist){
+				shortestDist = dist;
+			}
+			
+		}
+		
+		return shortestDist;
+	}
+	
+	
+	private String getColor(int color){
+		 switch(color){ 
+	        case 0: 
+	            return "standard";
+	        case 1: 
+	            return "one";
+	        case 2: 
+	        	return "two";
+	        case 3: 
+	        	return "three";
+	        case 4: 
+	        	return "four";
+	        case 5: 
+	        	return "five";
+	        default: 
+	            return "standard";
+	        } 
+	}
 }
