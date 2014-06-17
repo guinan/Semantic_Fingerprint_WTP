@@ -88,6 +88,10 @@ public class MainClass {
 		graph.tidyFast(res.requestNodes, res.requestDepth);
 		System.out.println("Done ("+graph.getGraph().getEdgeCount()+" Edges left)");
 		
+		// --5.2) colorize Graph
+		
+		graph.colorizeDFS(res.requestNodes);
+		
 		// --6) Get Stats
 		System.out.println("-- Displaying edge statistics");
 		HashMap<String, Integer> edgeStats = graph.getEdgeOccurenceMap();
