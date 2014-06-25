@@ -186,8 +186,9 @@ public class WTPGraph {
 						nextLevelNodes.add(neighbour);
 						
 						// 3.3) check if the neighbor is already in any other list of the other start nodes (than its a linking node)
+						// TODO: if onlyShortetPath = false => check here that the path back to the origins does not intersect! Otherwise you get senseless paths!
 						boolean hasLinked = false;
-						for(int otherIdx = 0; otherIdx < numRequestNodes; otherIdx++) {
+						for(int otherIdx = 0; otherIdx < numRequestNodes; otherIdx++) { 
 							if (otherIdx == idxNode) continue;
 							boolean hasFoundLink = bfsMem.checkAndMark(otherIdx, neighbour);
 							if (hasFoundLink) hasLinked = true;
@@ -289,6 +290,26 @@ public class WTPGraph {
 			}
 			
 		}
+		
+		/**
+		 * If not only the shortest paths shall be returned additional nodes need an extra check. They must not use the same node on their path to the starting nodes.
+		 * @param excludedIdx
+		 * @param node
+		 * @return
+		 */
+		public LinkedList<Node> getConnectedNodes(int excludedIdx, Node node) {
+			LinkedList<Node> res = new LinkedList<Node>();
+			for(int idx = 0; idx < numRequestNodes; idx++) {
+				if (idx != excludedIdx) {
+					for(int level = maxDepth; level > 0; level--) {
+						// --------
+						// TODO: do something here that makes sense					
+						// -----------------
+					}
+				}
+			}
+			return res;
+		}
 
 		/**
 		 * check if a node is conatined in the set of already reached nodes
@@ -297,7 +318,7 @@ public class WTPGraph {
 		 * @return
 		 */
 		public boolean checkAndMark(int idx, Node node) {
-			for(int level = maxDepth; level >= 1; level--) { // dont check the level 0
+			for(int level = maxDepth; level >= 1; level--) {
 				HashSet<Node> nodesForLevel = getList(idx, level);
 				if (nodesForLevel.contains(node)) {
 					markBackwarts(idx, level, node);
