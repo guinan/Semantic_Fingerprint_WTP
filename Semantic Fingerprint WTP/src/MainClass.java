@@ -84,13 +84,13 @@ public class MainClass {
 		
 		
 		// -- 5) tidy graph
-		System.out.print("Tidying graph ("+graph.getGraph().getEdgeCount()+" Edges)...");
+		System.out.print("Tidying graph (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges) ...");
 		graph.tidyFast(res.requestNodes, res.requestDepth);
-		System.out.println("Done ("+graph.getGraph().getEdgeCount()+" Edges left)");
+		System.out.println(" Done (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges)");
 		
 		// --5.2) colorize Graph
 		
-		graph.colorizeDFS(res.requestNodes);
+		//graph.colorizeDFS(res.requestNodes);
 		
 		// --6) Get Stats
 		System.out.println("-- Displaying edge statistics");

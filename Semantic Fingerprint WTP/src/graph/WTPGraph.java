@@ -138,49 +138,54 @@ public class WTPGraph {
 	 * @param visited nodes that have already been analysed (saves weather the node is a connector or not)
 	 */
 	public void tidyFast(List<dbpedia.BreadthFirstSearch.Node> requestedNodes, int maxDepth) {
+		final boolean onlyShortestPaths = true;
+		
 		HashSet<Node> requestNodes = new HashSet<Node>();
 		// put request nodes into hashmap
-		for(dbpedia.BreadthFirstSearch.Node temp : requestedNodes){
+		for(dbpedia.BreadthFirstSearch.Node temp : requestedNodes) {
 			requestNodes.add(graph.getNode(temp.resourceName()));
 		}
 		
 		// 1) init vars
 		int numRequestNodes = requestNodes.size();
-		BFS_Memory bfsMem = new BFS_Memory(numRequestNodes, maxDepth);
+		BFSMemory bfsMem = new BFSMemory(numRequestNodes, maxDepth);
 		
 		// 2) fill the level 0 lists
+		System.out.println("\n--- Start Nodes");
 		int k = 0;
 		for(Node n : requestNodes) {
 			bfsMem.getList(k, 0).add(n);
-			bfsMem.visitedNodes.put(n, true);
+			bfsMem.seenNodes.put(n, true);
 			k++;
+			System.out.println("(" + (k-1) + ") " + n);
 		}
+		System.out.println("--- Linking Nodes:");
 		
 		// 3) fill the other lists and serach for connector nodes
 		for (int level = 0; level < maxDepth; level++) {
 			for (int idxNode = 0; idxNode < numRequestNodes; idxNode++) {
 				// get all adjacent node for each node in this list
-				HashSet<Node> lastNodes = (level == 0) ? new HashSet<Node>() : bfsMem.getList(idxNode, level-1);
 				HashSet<Node> levelNodes = bfsMem.getList(idxNode, level);
 				HashSet<Node> nextLevelNodes = bfsMem.getList(idxNode, level+1);
 				
 				for(Node n : levelNodes) {
-					//if (level != 0 && bfsMem.visitedNodes.get(n)) continue;
+					if (onlyShortestPaths && level != 0 && bfsMem.seenNodes.get(n)) continue;
 					
 					Iterator<Node> neighborNodes = n.getNeighborNodeIterator();
 					while(neighborNodes.hasNext()) {
 						Node neighbour = neighborNodes.next();
 						// 3.1) check if we are going backwards to were we came from
-						if (lastNodes.contains(neighbour)) continue;
+						if (bfsMem.seenFromNode(idxNode, neighbour)) continue; // make this constraint weaker to get longer paths
+						//if (bfsMem.visitedFromNodeAtLevel(idxNode, neighbour, level-1)) continue;
 						
 						
 						// 3.2) add it to this list
-						if (!bfsMem.visitedNodes.containsKey(neighbour)) {
-							bfsMem.visitedNodes.put(neighbour, false);
-							nextLevelNodes.add(neighbour);
+						if (!bfsMem.seenNodes.containsKey(neighbour)) {
+							bfsMem.seenNodes.put(neighbour, false);
 						}
+						nextLevelNodes.add(neighbour);
 						
-						// 3.3) check if the neighbour is already in any other list of the other start nodes (than its a linking node)
+						// 3.3) check if the neighbor is already in any other list of the other start nodes (than its a linking node)
 						boolean hasLinked = false;
 						for(int otherIdx = 0; otherIdx < numRequestNodes; otherIdx++) {
 							if (otherIdx == idxNode) continue;
@@ -201,7 +206,7 @@ public class WTPGraph {
 		// 4) delete all nodes that have not been marked as linking nodes
 		List<Node> nToDelete = new LinkedList<Node>();
 		for(Node n : graph) {
-			if (!bfsMem.visitedNodes.containsKey(n) || !bfsMem.visitedNodes.get(n)) { // bfsMem.visitedNodes.containsKey(n) because: when we delete edges small unconnected groups could remain
+			if (!bfsMem.seenNodes.containsKey(n) || !bfsMem.seenNodes.get(n)) { // bfsMem.visitedNodes.containsKey(n) because: when we delete edges small unconnected groups could remain
 				nToDelete.add(n);
 			}
 		}
@@ -215,14 +220,14 @@ public class WTPGraph {
 	 * Implements a Matrix
 	 *
 	 */
-	private class BFS_Memory {
-		public final HashMap<Node, Boolean> visitedNodes = new HashMap<Node, Boolean>(); // saves visited nodes and whether the node is a linking node
+	private class BFSMemory {
+		public final HashMap<Node, Boolean> seenNodes = new HashMap<Node, Boolean>(); // saves visited nodes and whether the node is a linking node
 		public final ArrayList<HashSet<Node>> visited; // saves the nodes for each level of the bfs from each startnode
 		public final int numRequestNodes;
 		public final int numListsEachNode;
 		public final int maxDepth;
 		
-		public BFS_Memory(int numRequestNodes, int maxDepth) {
+		public BFSMemory(int numRequestNodes, int maxDepth) {
 			this.maxDepth = maxDepth;
 			this.numListsEachNode = maxDepth + 1;
 			this.numRequestNodes = numRequestNodes;
@@ -235,12 +240,41 @@ public class WTPGraph {
 		}
 		
 		/**
+		 * Returns true if the bfs already found this node (starting at the specified node)
+		 * @param idx
+		 * @param node
+		 * @return
+		 */
+		public boolean seenFromNode(int idx, Node node) {
+			for(int level = maxDepth; level >= 0; level--) {
+				HashSet<Node> nodesForLevel = getList(idx, level);
+				if (nodesForLevel.contains(node)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		/**
+		 * Returns true if the node was already reached from the given idx start node on the given level
+		 * @param idx
+		 * @param node
+		 * @param level
+		 * @return
+		 */
+		public boolean visitedFromNodeAtLevel(int idx, Node node, int level) {
+			if (level < 0) return false;
+			else return getList(idx, level).contains(node);
+		}
+		
+		/**
 		 * Mark
 		 * @param idx
 		 * @param node
 		 */
 		public void markBackwarts(int idx, int level, Node node) {
-			visitedNodes.put(node, true);
+			seenNodes.put(node, true);
+			System.out.println("Marked '" + node + " as linking node (level: "+ level +", index: "+idx+ ").");
 			// mark all adjacent nodes
 			if (level > 1) {
 				HashSet<Node> nodesForNextLevel = getList(idx, level-1);
