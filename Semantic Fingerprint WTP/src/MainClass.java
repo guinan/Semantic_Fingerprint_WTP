@@ -143,6 +143,8 @@ public class MainClass {
 				"7", "21",
 				"21", "22",
 				"22", "9",
+				"2", "23",
+				"23", "3",
 		};
 		Graph g = graph.getGraph();
 		for(int i = 0; i < arr.length; i += 2) {
@@ -159,7 +161,7 @@ public class MainClass {
 		List<dbpedia.BreadthFirstSearch.Node> start = new LinkedList<dbpedia.BreadthFirstSearch.Node>();
 		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/A"));
 		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/B"));
-		graph.tidyFast(start, 2, 1);
+		graph.tidyFast(start, 4, 2);
 		
 		graph.display();
 	}
