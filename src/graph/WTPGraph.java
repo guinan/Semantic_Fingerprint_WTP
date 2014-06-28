@@ -141,9 +141,9 @@ public class WTPGraph {
 	 * @param maxDetourLength (gets ignored until now -> should be set to zero)
 	 * @param visited nodes that have already been analysed (saves weather the node is a connector or not)
 	 */
-	public void tidyFast(List<dbpedia.BreadthFirstSearch.Node> requestedNodes, int maxPathLength, int maxLengthWithDetour) {
-		int maxDepth = (int) Math.ceil((maxPathLength+1)/(double)2);
-		int maxDetourLength = (maxLengthWithDetour > maxPathLength) ? maxLengthWithDetour - maxPathLength : 0;
+	public void tidyFast(List<dbpedia.BreadthFirstSearch.Node> requestedNodes, int maxPathLength, int maxExtensionPathLength) {
+		int maxDepth = (int) Math.ceil((Math.max(maxPathLength, maxExtensionPathLength)+1)/(double)2);
+		int maxDetourLength = (maxExtensionPathLength > maxPathLength) ? maxExtensionPathLength - maxPathLength : 0;
 		
 		HashSet<Node> requestNodes = new HashSet<Node>();
 		// put request nodes into hashmap
@@ -160,7 +160,7 @@ public class WTPGraph {
 		int k = 0;
 		for(Node n : requestNodes) {
 			bfsMem.getList(k, 0).add(n);
-			bfsMem.seenNodes.put(n, true);
+			bfsMem.seenNodes.put(n, (byte) 1);
 			k++;
 			System.out.println("(" + (k-1) + ") " + n);
 		}
@@ -174,7 +174,7 @@ public class WTPGraph {
 				HashSet<Node> nextLevelNodes = bfsMem.getList(idxNode, level+1);
 				
 				for(Node n : levelNodes) {
-					if ((maxDetourLength == 0) && level != 0 && bfsMem.seenNodes.get(n)) continue; // just for performance improvements
+					if ((maxDetourLength == 0) && level != 0 && bfsMem.seenNodes.get(n) > 0) continue; // just for performance improvements
 					
 					Iterator<Node> neighborNodes = n.getNeighborNodeIterator();
 					while(neighborNodes.hasNext()) {
@@ -186,7 +186,7 @@ public class WTPGraph {
 						
 						// 3.2) add it to this list
 						if (!bfsMem.seenNodes.containsKey(neighbour)) {
-							bfsMem.seenNodes.put(neighbour, false);
+							bfsMem.seenNodes.put(neighbour, (byte) 0);
 						}
 						nextLevelNodes.add(neighbour);
 						
@@ -212,14 +212,33 @@ public class WTPGraph {
 							for (LinkedList<Node> path : paths) {
 								for (LinkedList<Node> p : thisPaths) {
 									if (Collections.disjoint(path, p)) {
+										byte pathType; // 0: kürzester Pfad, 1: erweiterter Pfad, 2: implizieter (erweiterter) Pfad
+										// a) generate path
 										LinkedList<Node> completePath = (LinkedList<Node>) p.clone();
 										completePath.addAll(path);
-										// mark all the nodes as linking nodes (if the path is not to long)
-										if (completePath.size() <= (maxPathLength+2)) {
+										// b) count the deteur length
+										int shortNodes = 0;
+										for(Node pathNode : completePath) {
+											if (bfsMem.seenNodes.get(pathNode) == 1) {
+												shortNodes++;
+											}
+										}
+										if (shortNodes == 2) { // only the startNodes are already marked
+											pathType = (byte) 0;
+										} else if(shortNodes == completePath.size()) {
+											pathType = (byte) 2;
+										} else {
+											pathType = (byte) 1;
+										}
+										// c) mark all the nodes as linking nodes (if the path is not to long)
+										if ((pathType == 0 && completePath.size() <= (maxPathLength+2)) || (pathType > 0 && completePath.size() <= (maxExtensionPathLength+2))) {
 											for(Node pathNode : completePath) {
-												bfsMem.seenNodes.put(pathNode, true);
+												if (bfsMem.seenNodes.get(pathNode) == 0) {
+													bfsMem.seenNodes.put(pathNode, (byte) (pathType+1)); // will never return 3 because implicit paths do not have a node with value == 0
+												}
 											}
 											//TODO: save the found paths
+											int extensionLength = completePath.size() - shortNodes;
 										}
 									}
 								}
@@ -234,7 +253,7 @@ public class WTPGraph {
 		// 4) delete all nodes that have not been marked as linking nodes
 		List<Node> nToDelete = new LinkedList<Node>();
 		for(Node n : graph) {
-			if (!bfsMem.seenNodes.containsKey(n) || !bfsMem.seenNodes.get(n)) { // bfsMem.visitedNodes.containsKey(n) because: when we delete edges small unconnected groups could remain
+			if (!bfsMem.seenNodes.containsKey(n) || bfsMem.seenNodes.get(n) == 0) { // bfsMem.visitedNodes.containsKey(n) because: when we delete edges small unconnected groups could remain
 				nToDelete.add(n);
 			}
 		}
@@ -249,7 +268,8 @@ public class WTPGraph {
 	 *
 	 */
 	private class BFSMemory {
-		public final HashMap<Node, Boolean> seenNodes = new HashMap<Node, Boolean>(); // saves visited nodes and whether the node is a linking node
+		// 0: not a linking node, 1: linking node on shortest path, 2: linking node on extension path
+		public final HashMap<Node, Byte> seenNodes = new HashMap<Node, Byte>(); // saves visited nodes and whether the node is a linking node
 		public final ArrayList<HashSet<Node>> visited; // saves the nodes for each level of the bfs from each startnode
 		public final int numRequestNodes;
 		public final int numListsEachNode;
@@ -300,8 +320,9 @@ public class WTPGraph {
 		 * @param idx
 		 * @param node
 		 */
+		@Deprecated
 		public void markBackwarts(int idx, int level, Node node) {
-			seenNodes.put(node, true);
+			seenNodes.put(node, (byte) 1);
 			//System.out.println("Marked '" + node + " as linking node (level: "+ level +", index: "+idx+ ").");
 			// mark all adjacent nodes
 			if (level > 1) {
