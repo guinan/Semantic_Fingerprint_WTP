@@ -138,11 +138,11 @@ public class WTPGraph {
 	 * Tidys the graph using BreadthFirstSearch
 	 * @param requestNodes#
 	 * @param maxPathLength
-	 * @param maxExtensionPathLength
-	 * @param visited nodes that have already been analysed (saves weather the node is a connector or not)
+	 * @param maxExtensionLength
+	 * @param visited nodes that have already been analyzed (saves weather the node is a connector or not)
 	 */
-	public void tidyFast(List<dbpedia.BreadthFirstSearch.Node> requestedNodes, int maxPathLength, int maxExtensionPathLength) {
-		int maxDepth = (int) Math.ceil((Math.max(maxPathLength, maxExtensionPathLength)+1)/(double)2);
+	public void tidyFast(List<dbpedia.BreadthFirstSearch.Node> requestedNodes, int maxPathLength, int maxExtensionLength) {
+		int maxDepth = (int) Math.ceil((maxPathLength+1)/(double)2);
 		
 		HashSet<Node> requestNodes = new HashSet<Node>();
 		// put request nodes into hashmap
@@ -173,7 +173,7 @@ public class WTPGraph {
 				HashSet<Node> nextLevelNodes = bfsMem.getList(idxNode, level+1);
 				
 				for(Node n : levelNodes) {
-					if ((maxExtensionPathLength <= 1) && level != 0 && bfsMem.seenNodes.get(n) > 0) continue; // just for performance improvements
+					if ((maxExtensionLength == 0) && level != 0 && bfsMem.seenNodes.get(n) > 0) continue; // just for performance improvements
 					
 					Iterator<Node> neighborNodes = n.getNeighborNodeIterator();
 					while(neighborNodes.hasNext()) {
@@ -229,15 +229,16 @@ public class WTPGraph {
 										} else {
 											pathType = (byte) 1;
 										}
+										int extensionLength = completePath.size() - shortNodes;
 										// c) mark all the nodes as linking nodes (if the path is not to long)
-										if ((pathType == 0 && completePath.size() <= (maxPathLength+2)) || (pathType > 0 && completePath.size() <= (maxExtensionPathLength+2))) {
+										if (completePath.size() <= (maxPathLength+2) && (pathType == 0|| extensionLength <= maxExtensionLength)) {
 											for(Node pathNode : completePath) {
 												if (bfsMem.seenNodes.get(pathNode) == 0) {
 													bfsMem.seenNodes.put(pathNode, (byte) (pathType+1)); // will never return 3 because implicit paths do not have a node with value == 0
 												}
 											}
 											//TODO: save the found paths
-											int extensionLength = completePath.size() - shortNodes;
+											
 										}
 									}
 								}
