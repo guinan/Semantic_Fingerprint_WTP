@@ -2,6 +2,8 @@ package graph;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -134,11 +136,14 @@ public class WTPGraph {
 	
 	/**
 	 * Tidys the graph using BreadthFirstSearch
-	 * @param requestNodes
+	 * @param requestNodes#
+	 * @param maxPathLength
+	 * @param maxDetourLength (gets ignored until now -> should be set to zero)
 	 * @param visited nodes that have already been analysed (saves weather the node is a connector or not)
 	 */
-	public void tidyFast(List<dbpedia.BreadthFirstSearch.Node> requestedNodes, int maxDepth) {
-		final boolean onlyShortestPaths = true;
+	public void tidyFast(List<dbpedia.BreadthFirstSearch.Node> requestedNodes, int maxPathLength, int maxLengthWithDetour) {
+		int maxDepth = (int) Math.ceil((maxPathLength+1)/(double)2);
+		int maxDetourLength = (maxLengthWithDetour > maxPathLength) ? maxLengthWithDetour - maxPathLength : 0;
 		
 		HashSet<Node> requestNodes = new HashSet<Node>();
 		// put request nodes into hashmap
@@ -151,7 +156,7 @@ public class WTPGraph {
 		BFSMemory bfsMem = new BFSMemory(numRequestNodes, maxDepth);
 		
 		// 2) fill the level 0 lists
-		System.out.println("\n--- Start Nodes");
+		//System.out.println("\n--- Start Nodes");
 		int k = 0;
 		for(Node n : requestNodes) {
 			bfsMem.getList(k, 0).add(n);
@@ -159,7 +164,7 @@ public class WTPGraph {
 			k++;
 			System.out.println("(" + (k-1) + ") " + n);
 		}
-		System.out.println("--- Linking Nodes:");
+		//System.out.println("--- Linking Nodes:");
 		
 		// 3) fill the other lists and serach for connector nodes
 		for (int level = 0; level < maxDepth; level++) {
@@ -169,7 +174,7 @@ public class WTPGraph {
 				HashSet<Node> nextLevelNodes = bfsMem.getList(idxNode, level+1);
 				
 				for(Node n : levelNodes) {
-					if (onlyShortestPaths && level != 0 && bfsMem.seenNodes.get(n)) continue;
+					if ((maxDetourLength == 0) && level != 0 && bfsMem.seenNodes.get(n)) continue; // just for performance improvements
 					
 					Iterator<Node> neighborNodes = n.getNeighborNodeIterator();
 					while(neighborNodes.hasNext()) {
@@ -186,17 +191,39 @@ public class WTPGraph {
 						nextLevelNodes.add(neighbour);
 						
 						// 3.3) check if the neighbor is already in any other list of the other start nodes (than its a linking node)
-						// TODO: if onlyShortetPath = false => check here that the path back to the origins does not intersect! Otherwise you get senseless paths!
-						boolean hasLinked = false;
+						LinkedList<LinkedList<Node>> paths = new LinkedList<LinkedList<Node>>();
 						for(int otherIdx = 0; otherIdx < numRequestNodes; otherIdx++) { 
 							if (otherIdx == idxNode) continue;
-							boolean hasFoundLink = bfsMem.checkAndMark(otherIdx, neighbour);
-							if (hasFoundLink) hasLinked = true;
+							paths.addAll(bfsMem.getAllPathsBack(otherIdx, neighbour));
+							// remove the first element from all the lists (because its the linking node)
+							for (LinkedList<Node> path : paths) {
+								path.removeFirst();
+							}
 						}
 						
 						// 3.4) if so mark it as linking node (and all other nodes from this node to the start as well)
-						if (hasLinked) {
-							bfsMem.markBackwarts(idxNode, level+1, neighbour);
+						if (!paths.isEmpty()) {
+							LinkedList<LinkedList<Node>> thisPaths = bfsMem.getAllPathsBack(idxNode, neighbour);
+							// reverse all lists for faster complete path genertion
+							for (LinkedList<Node> path : thisPaths) {
+								Collections.reverse(path);
+							}
+							// Search for correct paths
+							for (LinkedList<Node> path : paths) {
+								for (LinkedList<Node> p : thisPaths) {
+									if (Collections.disjoint(path, p)) {
+										LinkedList<Node> completePath = (LinkedList<Node>) p.clone();
+										completePath.addAll(path);
+										// mark all the nodes as linking nodes (if the path is not to long)
+										if (completePath.size() <= (maxPathLength+2)) {
+											for(Node pathNode : completePath) {
+												bfsMem.seenNodes.put(pathNode, true);
+											}
+											//TODO: save the found paths
+										}
+									}
+								}
+							}
 						}
 					}
 					
@@ -275,7 +302,7 @@ public class WTPGraph {
 		 */
 		public void markBackwarts(int idx, int level, Node node) {
 			seenNodes.put(node, true);
-			System.out.println("Marked '" + node + " as linking node (level: "+ level +", index: "+idx+ ").");
+			//System.out.println("Marked '" + node + " as linking node (level: "+ level +", index: "+idx+ ").");
 			// mark all adjacent nodes
 			if (level > 1) {
 				HashSet<Node> nodesForNextLevel = getList(idx, level-1);
@@ -297,17 +324,59 @@ public class WTPGraph {
 		 * @param node
 		 * @return
 		 */
-		public LinkedList<Node> getConnectedNodes(int excludedIdx, Node node) {
-			LinkedList<Node> res = new LinkedList<Node>();
-			for(int idx = 0; idx < numRequestNodes; idx++) {
-				if (idx != excludedIdx) {
-					for(int level = maxDepth; level > 0; level--) {
-						// --------
-						// TODO: do something here that makes sense					
-						// -----------------
-					}
+		public LinkedList<LinkedList<Node>> getAllPathsBack(int idx, Node node) {
+			LinkedList<LinkedList<Node>> res = new LinkedList<LinkedList<Node>>();
+			
+			for(int level = maxDepth; level >= 0; level--) {
+				HashSet<Node> nodesForLevel = getList(idx, level);
+				if (nodesForLevel.contains(node)) {
+					// add start node
+					LinkedList<Node> tmp = new LinkedList<Node>();
+					tmp.add(node);
+					
+					// extend to paths, TODO: do not recursively
+					res.addAll(extendBack(tmp, idx, level-1));
+					
+					// stop searching for the start node
+					break;
 				}
 			}
+			
+			return res;
+		}
+
+		/**
+		 * Tiefensuche zum finden aller Pfade zurück zum Startknoten
+		 * @param pathUntilNow
+		 * @param idx
+		 * @param level
+		 * @return
+		 */
+		private LinkedList<LinkedList<Node>> extendBack(LinkedList<Node> pathUntilNow, int idx, int level) {
+			LinkedList<LinkedList<Node>> res = new LinkedList<LinkedList<Node>>();
+			
+			if (level < 0) {
+				LinkedList<Node> p = (LinkedList<Node>) pathUntilNow.clone();
+				res.add(p);
+				return res;
+			}
+			
+			// search deeper
+			Node node = pathUntilNow.getLast();
+			HashSet<Node> nodesForLevel = getList(idx, level);
+			
+			// serach
+			Iterator<Node> neighborNodes = node.getNeighborNodeIterator();
+			while(neighborNodes.hasNext()) {
+				Node neighbour = neighborNodes.next();
+				if (nodesForLevel.contains(neighbour)) {
+					// extend list
+					pathUntilNow.addLast(neighbour);
+					res.addAll(extendBack(pathUntilNow, idx, level-1));
+					pathUntilNow.removeLast();
+				}
+			}
+			// and return
 			return res;
 		}
 
