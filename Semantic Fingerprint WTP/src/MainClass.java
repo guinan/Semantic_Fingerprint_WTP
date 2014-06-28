@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.graphstream.graph.Edge;
@@ -23,7 +24,8 @@ public class MainClass {
 		request.add("http://dbpedia.org/resource/C++");
 		//request.add("http://dbpedia.org/page/ML_(programming_language)"); According to RelFinder there should be a connection!
 		
-		generateGraph(request, 2);
+		//generateGraph(request, 2);
+		generateTestGraph();
 	}
 	
 	/**
@@ -70,6 +72,7 @@ public class MainClass {
 				//System.out.println("Node: " + e.toString());
 			}
 		}
+		
 		/*node {
 			fill-color: black;
 		}*/
@@ -79,13 +82,13 @@ public class MainClass {
 		graph.removeEdgesByName("paradigm");
 		graph.removeEdgesByName("influencedBy");
 		graph.removeEdgesByName("influenced");
-		graph.removeEdgesByName("typing");
-		//graph.removeEdgesByName("license");
+//		graph.removeEdgesByName("typing");
+//		graph.removeEdgesByName("license");
 		
 		
 		// -- 5) tidy graph
 		System.out.print("Tidying graph (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges) ...");
-		graph.tidyFast(res.requestNodes, res.requestDepth);
+		graph.tidyFast(res.requestNodes, res.requestDepth, 0);
 		System.out.println(" Done (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges)");
 		
 		// --5.2) colorize Graph
@@ -93,11 +96,11 @@ public class MainClass {
 		//graph.colorizeDFS(res.requestNodes);
 		
 		// --6) Get Stats
-		System.out.println("-- Displaying edge statistics");
+		/*System.out.println("-- Displaying edge statistics");
 		HashMap<String, Integer> edgeStats = graph.getEdgeOccurenceMap();
 		for(Entry<String, Integer> e : edgeStats.entrySet()) {
 			System.out.println(e.getKey() + ": " + e.getValue());
-		}
+		}*/
 
 		// -- 7) display graph
 		System.out.println("-- Displaying graph...");
@@ -105,20 +108,59 @@ public class MainClass {
 		
 	}
 	
-	// ------------------ Cache Test
-	protected static class Person implements Serializable{
-		String name = "Hannes";
-		int age = 25;
-	}
-	
-	/**
-	 * 
-	 */
-	public void cacheTest() {
-		//Person p = new Person();
-		FileCache<Person> cache = new FileCache<Person>("persons");
-		//cache.put("h", p);
-		//Person p = cache.get("h");
-		//System.out.println(p.name + " = " + p.age);
+	private static void generateTestGraph() {
+		WTPGraph graph = new WTPGraph("Test");
+		
+		String[] arr = new String[] {
+				"A", "4",
+				"A", "2",
+				"A", "15",
+				"15", "14",
+				"14", "13",
+				"15", "13",
+				"4", "5",
+				"5", "6",
+				"2", "3",
+				"A", "1",
+				"B", "1",
+				"1", "11",
+				"11", "12",
+				"12", "1",
+				"A", "7",
+				"7", "10",
+				"7", "8",
+				"8", "9",
+				"9", "B",
+				"B", "7",
+				"B", "16",
+				"16", "17",
+				"18", "16",
+				"6", "B",
+				"B", "3",
+				"19", "20",
+				"11", "19",
+				"12", "20",
+				"7", "21",
+				"21", "22",
+				"22", "9",
+		};
+		Graph g = graph.getGraph();
+		for(int i = 0; i < arr.length; i += 2) {
+			String src = arr[i];
+			String dest = arr[i+1];
+			if (g.getNode(src) == null) graph.addNode(src);
+			if (g.getNode(dest) == null) graph.addNode(dest);
+			g.addEdge(""+ i, src, dest, false);
+		}
+		
+		g.getNode("A").setAttribute("ui.class", "request");
+		g.getNode("B").setAttribute("ui.class", "request");
+		
+		List<dbpedia.BreadthFirstSearch.Node> start = new LinkedList<dbpedia.BreadthFirstSearch.Node>();
+		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/A"));
+		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/B"));
+		graph.tidyFast(start, 3, 0);
+		
+		graph.display();
 	}
 }
