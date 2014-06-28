@@ -159,7 +159,7 @@ public class MainClass {
 		List<dbpedia.BreadthFirstSearch.Node> start = new LinkedList<dbpedia.BreadthFirstSearch.Node>();
 		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/A"));
 		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/B"));
-		graph.tidyFast(start, 1, 3);
+		graph.tidyFast(start, 2, 1);
 		
 		graph.display();
 	}

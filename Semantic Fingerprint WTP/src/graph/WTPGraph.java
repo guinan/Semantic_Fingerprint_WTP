@@ -138,12 +138,11 @@ public class WTPGraph {
 	 * Tidys the graph using BreadthFirstSearch
 	 * @param requestNodes#
 	 * @param maxPathLength
-	 * @param maxDetourLength (gets ignored until now -> should be set to zero)
+	 * @param maxExtensionPathLength
 	 * @param visited nodes that have already been analysed (saves weather the node is a connector or not)
 	 */
 	public void tidyFast(List<dbpedia.BreadthFirstSearch.Node> requestedNodes, int maxPathLength, int maxExtensionPathLength) {
 		int maxDepth = (int) Math.ceil((Math.max(maxPathLength, maxExtensionPathLength)+1)/(double)2);
-		int maxDetourLength = (maxExtensionPathLength > maxPathLength) ? maxExtensionPathLength - maxPathLength : 0;
 		
 		HashSet<Node> requestNodes = new HashSet<Node>();
 		// put request nodes into hashmap
@@ -174,7 +173,7 @@ public class WTPGraph {
 				HashSet<Node> nextLevelNodes = bfsMem.getList(idxNode, level+1);
 				
 				for(Node n : levelNodes) {
-					if ((maxDetourLength == 0) && level != 0 && bfsMem.seenNodes.get(n) > 0) continue; // just for performance improvements
+					if ((maxExtensionPathLength <= 1) && level != 0 && bfsMem.seenNodes.get(n) > 0) continue; // just for performance improvements
 					
 					Iterator<Node> neighborNodes = n.getNeighborNodeIterator();
 					while(neighborNodes.hasNext()) {
