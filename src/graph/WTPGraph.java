@@ -19,6 +19,8 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
 
+import utils.OccurenceCounter;
+
 public class WTPGraph {
 	private Graph graph;
 	private Map<String,String> requestNodes;
@@ -194,21 +196,16 @@ public class WTPGraph {
 	 * 
 	 * @return
 	 */
-	public HashMap<String, Integer> getEdgeOccurenceMap() {
-		HashMap<String, Integer> stats = new HashMap<String, Integer>();
+	public OccurenceCounter<String> getEdgeOccurences() {
+		OccurenceCounter<String> counter = new OccurenceCounter<String>();
+		
 		Iterator<Edge> eIt = graph.getEdgeIterator();
 		while(eIt.hasNext()) {
 			Edge e = eIt.next();
 			String key = e.getAttribute("ui.label");
-			Integer num = stats.get(key);
-			if (num == null) {
-				num = new Integer(1);
-			} else {
-				num++;
-			}
-			stats.put(key, num);
+			counter.inc(key);
 		}
-		return stats;
+		return counter;
 	}
 	
 	/**

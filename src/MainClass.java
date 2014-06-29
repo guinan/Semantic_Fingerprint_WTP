@@ -1,4 +1,6 @@
 import graph.GraphCleaner;
+import graph.GraphCleaner.ExtendedPath;
+import graph.GraphCleaner.ImplicitPath;
 import graph.GraphCleaner.Path;
 import graph.WTPGraph;
 
@@ -14,6 +16,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 
 import utils.FileCache;
+import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch;
 import dbpedia.BreadthFirstSearch.ResultSet;
 
@@ -99,11 +102,25 @@ public class MainClass {
 		//graph.colorizeDFS(res.requestNodes);
 		
 		// --6) Get Stats
-		/*System.out.println("-- Displaying edge statistics");
-		HashMap<String, Integer> edgeStats = graph.getEdgeOccurenceMap();
-		for(Entry<String, Integer> e : edgeStats.entrySet()) {
-			System.out.println(e.getKey() + ": " + e.getValue());
-		}*/
+		System.out.println("-- Displaying path statistics");
+		int[] types = new int[3];
+		OccurenceCounter<Integer> counter = new OccurenceCounter<Integer>();
+		for(Path p : paths) {
+			// count types
+			if (p instanceof ExtendedPath) types[1]++;
+			else if (p instanceof ImplicitPath) types[2]++;
+			else types[0]++;
+			// count length
+			counter.inc(p.size());
+		}
+		System.out.println("Kurze Pfade: " + types[0]);
+		System.out.println("Erweiterte Pfade: " + types[1]);
+		System.out.println("Implizite Pfade: " + types[2]);
+		System.out.println("Pfadlängen: " + counter);
+		
+		System.out.println("-- Displaying edge statistics");
+		OccurenceCounter<String> edgeStats = graph.getEdgeOccurences();
+		System.out.println(edgeStats);
 
 		// -- 7) display graph
 		System.out.println("-- Displaying graph...");
