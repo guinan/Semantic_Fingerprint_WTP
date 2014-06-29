@@ -178,11 +178,12 @@ public class GraphCleaner {
 						LinkedList<LinkedList<Node>> paths = new LinkedList<LinkedList<Node>>();
 						for(int otherIdx = 0; otherIdx < numRequestNodes; otherIdx++) { 
 							if (otherIdx == idxNode) continue;
-							paths.addAll(bfsMem.getAllPathsBack(otherIdx, neighbour));
+							LinkedList<LinkedList<Node>> pathToThisNode = bfsMem.getAllPathsBack(otherIdx, neighbour);
 							// remove the first element from all the lists (because its the linking node)
-							for (LinkedList<Node> path : paths) {
+							for (LinkedList<Node> path : pathToThisNode) {
 								path.removeFirst();
 							}
+							paths.addAll(pathToThisNode);
 						}
 						
 						// 3.4) if so mark it as linking node (and all other nodes from this node to the start as well)

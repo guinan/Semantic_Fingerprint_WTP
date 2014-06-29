@@ -27,10 +27,12 @@ public class MainClass {
 		LinkedList<String> request = new LinkedList<String>();
 		request.add("http://dbpedia.org/resource/Haskell_(programming_language)");
 		request.add("http://dbpedia.org/resource/C++");
-		//request.add("http://dbpedia.org/page/ML_(programming_language)"); According to RelFinder there should be a connection!
+		request.add("http://dbpedia.org/resource/Java_(programming_language)");
+		//request.add("http://dbpedia.org/page/ML_(programming_language)"); //According to RelFinder there should be a connection!
 		
 		generateGraph(request, 2);
-		//generateTestGraph();
+//		generateTestGraph();
+//		generateTestGraph_2();
 	}
 	
 	/**
@@ -111,7 +113,7 @@ public class MainClass {
 			else if (p instanceof ImplicitPath) types[2]++;
 			else types[0]++;
 			// count length
-			counter.inc(p.size());
+			counter.inc(p.size()-2);
 		}
 		System.out.println("Kurze Pfade: " + types[0]);
 		System.out.println("Erweiterte Pfade: " + types[1]);
@@ -187,6 +189,50 @@ public class MainClass {
 		LinkedList<Path> paths = c.clean(4, 2);
 		
 		System.out.println(paths);
+		graph.display();
+	}
+	
+	/**
+	 * 
+	 */
+	private static void generateTestGraph_2() {
+		WTPGraph graph = new WTPGraph("Test");
+		
+		String[] arr = new String[] {
+				"A", "2",
+				"2", "C",
+				"A", "1",
+				"1", "B",
+				"B", "3",
+				"3", "C",
+				"1", "4",
+				"4", "2",
+				"4", "3",
+				
+		};
+		Graph g = graph.getGraph();
+		for(int i = 0; i < arr.length; i += 2) {
+			String src = arr[i];
+			String dest = arr[i+1];
+			if (g.getNode(src) == null) graph.addNode(src);
+			if (g.getNode(dest) == null) graph.addNode(dest);
+			g.addEdge(""+ i, src, dest, false);
+		}
+		
+		g.getNode("A").setAttribute("ui.class", "request");
+		g.getNode("B").setAttribute("ui.class", "request");
+		g.getNode("C").setAttribute("ui.class", "request");
+		
+		List<dbpedia.BreadthFirstSearch.Node> start = new LinkedList<dbpedia.BreadthFirstSearch.Node>();
+		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/A"));
+		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/B"));
+		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/C"));
+		
+		// clean the graph
+		GraphCleaner c = new GraphCleaner(graph.getGraph(), start);
+		LinkedList<Path> paths = c.clean(3, 2);
+		
+//		System.out.println(paths);
 		graph.display();
 	}
 }
