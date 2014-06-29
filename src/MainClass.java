@@ -1,3 +1,5 @@
+import graph.GraphCleaner;
+import graph.GraphCleaner.Path;
 import graph.WTPGraph;
 
 import java.io.FileNotFoundException;
@@ -24,8 +26,8 @@ public class MainClass {
 		request.add("http://dbpedia.org/resource/C++");
 		//request.add("http://dbpedia.org/page/ML_(programming_language)"); According to RelFinder there should be a connection!
 		
-		//generateGraph(request, 2);
-		generateTestGraph();
+		generateGraph(request, 2);
+		//generateTestGraph();
 	}
 	
 	/**
@@ -88,8 +90,9 @@ public class MainClass {
 		
 		// -- 5) tidy graph
 		System.out.print("Tidying graph (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges) ...");
-		graph.tidyFast(res.requestNodes, res.requestDepth, 0);
-		System.out.println(" Done (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges)");
+		GraphCleaner c = new GraphCleaner(graph.getGraph(), res.requestNodes);
+		LinkedList<Path> paths = c.clean(res.requestDepth, 1);
+		System.out.println(" Done (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges, "+ paths.size() +" Paths)");
 		
 		// --5.2) colorize Graph
 		
@@ -161,8 +164,12 @@ public class MainClass {
 		List<dbpedia.BreadthFirstSearch.Node> start = new LinkedList<dbpedia.BreadthFirstSearch.Node>();
 		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/A"));
 		start.add(new dbpedia.BreadthFirstSearch.Node("http://dbpedia.org/resource/B"));
-		graph.tidyFast(start, 4, 2);
 		
+		// clean the graph
+		GraphCleaner c = new GraphCleaner(graph.getGraph(), start);
+		LinkedList<Path> paths = c.clean(4, 2);
+		
+		System.out.println(paths);
 		graph.display();
 	}
 }
