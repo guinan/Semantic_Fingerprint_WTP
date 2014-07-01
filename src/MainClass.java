@@ -1,3 +1,4 @@
+import filterheuristics.NodeRelevanceByIncludingPaths;
 import graph.GraphCleaner;
 import graph.GraphCleaner.ExtendedPath;
 import graph.GraphCleaner.ImplicitPath;
@@ -9,6 +10,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.graphstream.graph.Edge;
@@ -30,7 +32,7 @@ public class MainClass {
 		request.add("http://dbpedia.org/resource/Java_(programming_language)");
 		//request.add("http://dbpedia.org/page/ML_(programming_language)"); //According to RelFinder there should be a connection!
 		
-		generateGraph(request, 2);
+		generateGraph(request, 3);
 //		generateTestGraph();
 //		generateTestGraph_2();
 	}
@@ -85,10 +87,10 @@ public class MainClass {
 		}*/
 		
 		// -- 4) remove specific edges
-		graph.removeEdgesByName("ject");
-		graph.removeEdgesByName("paradigm");
-		graph.removeEdgesByName("influencedBy");
-		graph.removeEdgesByName("influenced");
+//		graph.removeEdgesByName("ject");
+//		graph.removeEdgesByName("paradigm");
+//		graph.removeEdgesByName("influencedBy");
+//		graph.removeEdgesByName("influenced");
 //		graph.removeEdgesByName("typing");
 //		graph.removeEdgesByName("license");
 		
@@ -99,9 +101,19 @@ public class MainClass {
 		LinkedList<Path> paths = c.clean(res.requestDepth, 1);
 		System.out.println(" Done (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges, "+ paths.size() +" Paths)");
 		
-		// --5.2) colorize Graph
+		// --5.2) tidy the second
+		
+		NodeRelevanceByIncludingPaths heuristic = new NodeRelevanceByIncludingPaths();
+		
+		heuristic.filterTheNMostVisited(graph, paths, 10);
+		//heuristic.filterByNumberOfPaths(graph, paths, 300);
+		
+		
+		// --5.3) colorize Graph
 		
 		//graph.colorizeDFS(res.requestNodes);
+		
+		
 		
 		// --6) Get Stats
 		System.out.println("-- Displaying path statistics");
@@ -118,7 +130,7 @@ public class MainClass {
 		System.out.println("Kurze Pfade: " + types[0]);
 		System.out.println("Erweiterte Pfade: " + types[1]);
 		System.out.println("Implizite Pfade: " + types[2]);
-		System.out.println("Pfadlängen: " + counter);
+		System.out.println("Pfadlï¿½ngen: " + counter);
 		
 		System.out.println("-- Displaying edge statistics");
 		OccurenceCounter<String> edgeStats = graph.getEdgeOccurences();
