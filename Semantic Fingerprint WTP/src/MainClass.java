@@ -6,35 +6,55 @@ import graph.GraphCleaner.Path;
 import graph.WTPGraph;
 
 import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
 
-import utils.FileCache;
 import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch;
+import dbpedia.KeyWordSearch;
 import dbpedia.BreadthFirstSearch.ResultSet;
+import dbpedia.KeyWordSearch.SearchResult;
 
 
 public class MainClass {
+	// Request to DBPedia
+	public static final int maxSearchResults = 10;
+	public static final int maxSearchDepth = 3;
+	// Initial cleaning of the graph
+	public static final int maxPathLength = maxSearchDepth;
+	public static final int maxPathExtensionLength = 1;
+	// Heuristics
+	public static final int numRelevantNodesFilter = 10;
+	public static final int minSupportNodesFilter = 300;
 	
+	/**
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
-		LinkedList<String> request = new LinkedList<String>();
+		// a) Serach for concepts
+		LinkedList<String> keywords = new LinkedList<String>();
+		keywords.add("Haskell");
+		keywords.add("C++");
+		keywords.add("Java");
+		
+		KeyWordSearch s = new KeyWordSearch();
+		List<SearchResult> res = s.search(keywords, maxSearchResults); 
+		//System.out.println(res);
+		//List<String> request = KeyWordSearch.toUriList(res); // TODO: use them as input for the next algorithm
+		
+		// b) Create the Graph
+		List<String> request = new LinkedList<String>();
 		request.add("http://dbpedia.org/resource/Haskell_(programming_language)");
 		request.add("http://dbpedia.org/resource/C++");
 		request.add("http://dbpedia.org/resource/Java_(programming_language)");
 		//request.add("http://dbpedia.org/page/ML_(programming_language)"); //According to RelFinder there should be a connection!
 		
-		generateGraph(request, 3);
-//		generateTestGraph();
-//		generateTestGraph_2();
+		generateGraph(request, maxSearchDepth);
+		
+		
 	}
 	
 	/**
@@ -42,51 +62,19 @@ public class MainClass {
 	 * @param request
 	 * @throws FileNotFoundException 
 	 */
-	public static void generateGraph(LinkedList<String> request, int searchDepth) {
+	public static void generateGraph(List<String> request, int searchDepth) {
 		// -- 1) get connections
 		System.out.println("Starting BFS...");
 		BreadthFirstSearch lc = new BreadthFirstSearch();
 		ResultSet res = lc.getConnections(request, searchDepth);
 		System.out.println("...Done");
 		
-		/*
-		// -- 2) write into file for debugging
-		try {
-			System.out.println("Writing Result to file...");
-			PrintStream outputStream = new PrintStream(new FileOutputStream("BFS_Output.txt", false));
-			res.printTo(outputStream);
-			System.out.println("...Done");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} */
-		
-		// -- 3) create the graph
+		// -- 2) create the graph
 		System.out.println("Creating the initial graph...");
-		WTPGraph graph = new WTPGraph("Testgraph");
-		// add nodes
-		for (dbpedia.BreadthFirstSearch.Node n : res.nodes) {
-			Node node = graph.addNode(n.resourceName());
-			if (res.requestNodes.contains(n)) {
-				node.setAttribute("ui.class", "request");
-			}
-		}
-		// add edges
-		boolean useDirectedEdges = false;
-		for (dbpedia.BreadthFirstSearch.Edge e : res.edges) {
-			try {
-				Edge edge = graph.getGraph().addEdge(""+ e.hashCode(), e.source.resourceName(), e.dest.resourceName(), useDirectedEdges);
-				edge.setAttribute("ui.label", e.getName());
-			} catch (org.graphstream.graph.EdgeRejectedException err) {
-				System.out.println("Error: " + err.getMessage());
-				//System.out.println("Node: " + e.toString());
-			}
-		}
+		WTPGraph graph = WTPGraph.createFromResultSet(res, "Testgraph");
+		System.out.println("...Done");
 		
-		/*node {
-			fill-color: black;
-		}*/
-		
-		// -- 4) remove specific edges
+		// -- 3) remove specific edges
 //		graph.removeEdgesByName("ject");
 //		graph.removeEdgesByName("paradigm");
 //		graph.removeEdgesByName("influencedBy");
@@ -95,24 +83,23 @@ public class MainClass {
 //		graph.removeEdgesByName("license");
 		
 		
-		// -- 5) tidy graph
+		// -- 4) tidy graph
 		System.out.print("Tidying graph (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges) ...");
 		GraphCleaner c = new GraphCleaner(graph.getGraph(), res.requestNodes);
-		LinkedList<Path> paths = c.clean(res.requestDepth, 1);
+		LinkedList<Path> paths = c.clean(maxPathLength, maxPathExtensionLength);
 		System.out.println(" Done (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges, "+ paths.size() +" Paths)");
 		
-		// --5.2) tidy the second
+		// --4.2) tidy the second
 		
 		NodeRelevanceByIncludingPaths heuristic = new NodeRelevanceByIncludingPaths();
 		
-		heuristic.filterTheNMostVisited(graph, paths, 10);
-		//heuristic.filterByNumberOfPaths(graph, paths, 300);
+		heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter);
+		//heuristic.filterByNumberOfPaths(graph, paths, minSupportNodesFilter);
 		
 		
-		// --5.3) colorize Graph
+		// --4.3) colorize Graph
 		
 		//graph.colorizeDFS(res.requestNodes);
-		
 		
 		
 		// --6) Get Stats
@@ -130,7 +117,7 @@ public class MainClass {
 		System.out.println("Kurze Pfade: " + types[0]);
 		System.out.println("Erweiterte Pfade: " + types[1]);
 		System.out.println("Implizite Pfade: " + types[2]);
-		System.out.println("Pfadlï¿½ngen: " + counter);
+		System.out.println("Pfadlängen: " + counter);
 		
 		System.out.println("-- Displaying edge statistics");
 		OccurenceCounter<String> edgeStats = graph.getEdgeOccurences();
@@ -142,6 +129,10 @@ public class MainClass {
 		
 	}
 	
+	
+	/**
+	 * Testgraph #1
+	 */
 	private static void generateTestGraph() {
 		WTPGraph graph = new WTPGraph("Test");
 		
@@ -205,7 +196,7 @@ public class MainClass {
 	}
 	
 	/**
-	 * 
+	 * Testgraph #2
 	 */
 	private static void generateTestGraph_2() {
 		WTPGraph graph = new WTPGraph("Test");
