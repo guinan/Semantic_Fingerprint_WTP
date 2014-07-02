@@ -19,6 +19,8 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
 
+import dbpedia.BreadthFirstSearch.ResultSet;
+
 import utils.OccurenceCounter;
 
 public class WTPGraph {
@@ -319,5 +321,34 @@ public class WTPGraph {
 	        default: 
 	            return "standard";
 	        } 
+	}
+
+	/**
+	 * 
+	 * @param res
+	 * @param name
+	 * @return
+	 */
+	public static WTPGraph createFromResultSet(ResultSet res, String name) {
+		WTPGraph graph = new WTPGraph(name);
+		// add nodes
+		for (dbpedia.BreadthFirstSearch.Node n : res.nodes) {
+			Node node = graph.addNode(n.resourceName());
+			if (res.requestNodes.contains(n)) {
+				node.setAttribute("ui.class", "request");
+			}
+		}
+		// add edges
+		boolean useDirectedEdges = false;
+		for (dbpedia.BreadthFirstSearch.Edge e : res.edges) {
+			try {
+				Edge edge = graph.getGraph().addEdge(""+ e.hashCode(), e.source.resourceName(), e.dest.resourceName(), useDirectedEdges);
+				edge.setAttribute("ui.label", e.getName());
+			} catch (org.graphstream.graph.EdgeRejectedException err) {
+				//System.out.println("Error: " + err.getMessage());
+				//System.out.println("Node: " + e.toString());
+			}
+		}
+		return graph;
 	}
 }

@@ -15,6 +15,7 @@ import utils.FileCache;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 
+import connector.DBPediaEndpoint;
 import connector.SparqlQueryExecuter;
 
 /**
@@ -37,6 +38,8 @@ public class BreadthFirstSearch {
 			+"PREFIX dbpedia: <http://dbpedia.org/>\n"
 			+"PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n"
 			;
+	
+	private final SparqlQueryExecuter queryExecuter = new DBPediaEndpoint();
 	
 	/**
 	 * 
@@ -298,7 +301,7 @@ public class BreadthFirstSearch {
 			// request with sparql
 			String query = createQueryString(resource.resourceURI);
 			//System.out.println(query);
-			List<QuerySolution> resultSet = SparqlQueryExecuter.executeQuery(query);
+			List<QuerySolution> resultSet = queryExecuter.executeQuery(query);
 			
 			// search for missing uri's (don't know why but some resources are named :_concept instead of <http://dbpedia.org/resource/concept>
 			for(QuerySolution sol : resultSet) {
