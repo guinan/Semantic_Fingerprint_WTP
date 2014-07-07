@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.graphstream.graph.Graph;
+import org.graphstream.graph.implementations.SingleGraph;
 
 import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch;
@@ -26,7 +27,7 @@ public class MainClass {
 	public static final int maxPathLength = maxSearchDepth;
 	public static final int maxPathExtensionLength = 1;
 	// Heuristics
-	public static final int numRelevantNodesFilter = 10;
+	public static final int numRelevantNodesFilter = 20;
 	public static final int minSupportNodesFilter = 300;
 	
 	/**
@@ -42,14 +43,13 @@ public class MainClass {
 		
 		KeyWordSearch s = new KeyWordSearch();
 		List<SearchResult> res = s.search(keywords, maxSearchResults); 
-		//System.out.println(res);
-		//List<String> request = KeyWordSearch.toUriList(res); // TODO: use them as input for the next algorithm
-		
+		System.out.println(res);
+		List<String> request = KeyWordSearch.toUriList(res); // TODO: use them as input for the next algorithm
 		// b) Create the Graph
-		List<String> request = new LinkedList<String>();
+		/*List<String> request = new LinkedList<String>();
 		request.add("http://dbpedia.org/resource/Haskell_(programming_language)");
 		request.add("http://dbpedia.org/resource/C++");
-		request.add("http://dbpedia.org/resource/Java_(programming_language)");
+		request.add("http://dbpedia.org/resource/Java_(programming_language)");*/
 		//request.add("http://dbpedia.org/page/ML_(programming_language)"); //According to RelFinder there should be a connection!
 		
 		generateGraph(request, maxSearchDepth);
@@ -96,6 +96,8 @@ public class MainClass {
 		heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter);
 		//heuristic.filterByNumberOfPaths(graph, paths, minSupportNodesFilter);
 		
+	
+		
 		
 		// --4.3) colorize Graph
 		
@@ -117,7 +119,7 @@ public class MainClass {
 		System.out.println("Kurze Pfade: " + types[0]);
 		System.out.println("Erweiterte Pfade: " + types[1]);
 		System.out.println("Implizite Pfade: " + types[2]);
-		System.out.println("Pfadlängen: " + counter);
+		System.out.println("Pfadlï¿½ngen: " + counter);
 		
 		System.out.println("-- Displaying edge statistics");
 		OccurenceCounter<String> edgeStats = graph.getEdgeOccurences();
