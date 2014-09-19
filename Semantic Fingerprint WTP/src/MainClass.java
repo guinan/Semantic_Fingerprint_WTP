@@ -6,12 +6,17 @@ import graph.GraphCleaner.Path;
 import graph.WTPGraph;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
 
+import com.hp.hpl.jena.tdb.store.Hash;
+
+import scala.collection.parallel.ParSeqLike.Corresponds;
 import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch;
 import dbpedia.KeyWordSearch;
@@ -22,12 +27,12 @@ import dbpedia.KeyWordSearch.SearchResult;
 public class MainClass {
 	// Request to DBPedia
 	public static final int maxSearchResults = 10;
-	public static final int maxSearchDepth = 3;
+	public static final int maxSearchDepth = 2;
 	// Initial cleaning of the graph
 	public static final int maxPathLength = maxSearchDepth;
 	public static final int maxPathExtensionLength = 1;
 	// Heuristics
-	public static final int numRelevantNodesFilter = 20;
+	public static final int numRelevantNodesFilter = 100;
 	public static final int minSupportNodesFilter = 300;
 	
 	/**
@@ -37,13 +42,24 @@ public class MainClass {
 	public static void main(String[] args) {
 		// a) Serach for concepts
 		LinkedList<String> keywords = new LinkedList<String>();
+		//keywords.add("Haskell");
+		//keywords.add("C++");
+		//keywords.add("Java");
+		
 		keywords.add("Haskell");
-		keywords.add("C++");
-		keywords.add("Java");
+		keywords.add("induction");
+		keywords.add("foldr");
+		keywords.add("fold");
+		keywords.add("higher order function");
+		keywords.add("prove");
+
+		
+		// map for the semantic concepts found in the ontology and their corresponding keyword, used for searching them
+		Map<String, String> correspondingKeywords = new HashMap<String, String>();
 		
 		KeyWordSearch s = new KeyWordSearch();
-		List<SearchResult> res = s.search(keywords, maxSearchResults); 
-		System.out.println(res);
+		List<SearchResult> res = s.search(keywords, maxSearchResults, correspondingKeywords); 
+ 		System.out.println(res);
 		List<String> request = KeyWordSearch.toUriList(res); // TODO: use them as input for the next algorithm
 		// b) Create the Graph
 		/*List<String> request = new LinkedList<String>();
@@ -52,7 +68,7 @@ public class MainClass {
 		request.add("http://dbpedia.org/resource/Java_(programming_language)");*/
 		//request.add("http://dbpedia.org/page/ML_(programming_language)"); //According to RelFinder there should be a connection!
 		
-		generateGraph(request, maxSearchDepth);
+		generateGraph(request, maxSearchDepth, correspondingKeywords);
 		
 		
 	}
@@ -62,7 +78,7 @@ public class MainClass {
 	 * @param request
 	 * @throws FileNotFoundException 
 	 */
-	public static void generateGraph(List<String> request, int searchDepth) {
+	public static void generateGraph(List<String> request, int searchDepth, Map<String, String> correspondingKeywords) {
 		// -- 1) get connections
 		System.out.println("Starting BFS...");
 		BreadthFirstSearch lc = new BreadthFirstSearch();
@@ -92,9 +108,12 @@ public class MainClass {
 		// --4.2) tidy the second
 		
 		NodeRelevanceByIncludingPaths heuristic = new NodeRelevanceByIncludingPaths();
-		
-		heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter);
+		heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter, correspondingKeywords);
+
+		//heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter);
 		//heuristic.filterByNumberOfPaths(graph, paths, minSupportNodesFilter);
+		//heuristic.filterByNumberOfPaths(graph, paths, 200);
+
 		
 	
 		

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import utils.FileCache;
 
@@ -100,21 +101,25 @@ public class KeyWordSearch {
 	 * @return
 	 */
 	public List<SearchResult> search(Collection<String> keywords) {
-		return search(keywords, defaultMaxResultSize);
+		return search(keywords, defaultMaxResultSize, null);
 	}
 	
-	/**
+	/**?? wird nur diese suchmethode genutzt? was ist mit den anderen?
 	 * 
 	 * @param keywords List of keywords for which concepts are searched in the DBPedia
 	 * @param limit Maximum number of concepts that will be returned.
+	 * @param correspondingKeywords and empty map, which should be filled with the semantic concepts foun
+	 *  in the ontology and their corresponding keyword, used for searching them
 	 * @return
 	 */
-	public List<SearchResult> search(Collection<String> keywords, int limit) {
+	public List<SearchResult> search(Collection<String> keywords, int limit, Map<String, String> correspondingKeywords) {
 		LinkedList<SearchResult> res = new LinkedList<SearchResult>();
 		for(String keyword : keywords) {
 			List<SearchResult> tmp = search(keyword, defaultMaxResultSize);
 			for(SearchResult sr : tmp) {
 				if (!res.contains(sr)) {
+					if(correspondingKeywords != null)
+						correspondingKeywords.put(sr.label, keyword);
 					res.add(sr);
 				}
 			}
