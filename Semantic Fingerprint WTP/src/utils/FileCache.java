@@ -12,7 +12,7 @@ import java.util.HashMap;
 /**
  * Stores cached data to a file.
  * Notice: The cache will grow steadily because there is no tidy mechanism until now.
- * @author Chris
+ * @author Christian Nywelt
  *
  * @param <T>
  */

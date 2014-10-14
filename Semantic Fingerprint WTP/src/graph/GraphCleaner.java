@@ -14,7 +14,8 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 
 /**
- * Implements an algorithm to remove unused nodes from a given graph.
+ * Implements an algorithm to remove unused nodes from a given graph. Returns all paths connecting the request nodes that match the given constraints (length).
+ * @author Christian Nywelt
  */
 public class GraphCleaner {
 	protected final Graph graph;
@@ -85,6 +86,11 @@ public class GraphCleaner {
 	 * 
 	 */
 	public static class ExtendedPath extends Path {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 7840724985771379176L;
+		
 		private final int extensionLength;
 		
 		public final int getExtensionLength() {
@@ -117,6 +123,11 @@ public class GraphCleaner {
 	 * 
 	 */
 	public static class ImplicitPath extends Path {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1853567879609198658L;
+
 		public ImplicitPath(LinkedList<Node> nodes) {
 			super(nodes);
 		}
@@ -213,7 +224,6 @@ public class GraphCleaner {
 											continue;
 										}
 										
-										// TODO: check if we found that path already
 										// c) count the deteur length
 										int shortNodes = 0;
 										for(Node pathNode : completePath) {

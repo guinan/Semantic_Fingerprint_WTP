@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +20,7 @@ import connector.SparqlQueryExecuter;
 /**
  * Performs a BreadthFirstSearch on DBPedia concepts.
  * Notice: Stores request data to application folder
- * @author Chris
+ * @author Christian Nywelt
  *
  */
 public class BreadthFirstSearch {
@@ -293,7 +292,7 @@ public class BreadthFirstSearch {
 			}
 			//System.out.println("Loaded data from cache.");
 			readFromCache++;
-		} else {
+		} else { // load from DBPedia online
 			requestedOnline++;
 			//System.out.print("Loading data from DBPedia...");
 			cachedNode = new AnalysedNode();

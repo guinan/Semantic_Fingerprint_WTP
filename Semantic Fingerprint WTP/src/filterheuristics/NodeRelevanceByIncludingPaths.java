@@ -14,6 +14,11 @@ import java.util.Queue;
 
 import org.graphstream.graph.Node;
 
+/**
+ * Creates a semantic fingerprint based on a subgraph that has already been cleaned.
+ * @author Jens Schneider
+ *
+ */
 public class NodeRelevanceByIncludingPaths {
 	
 	private Map<String, Integer> numberOfIncludingPaths;

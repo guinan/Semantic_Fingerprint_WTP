@@ -1,16 +1,11 @@
 package graph;
 
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
@@ -19,10 +14,14 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
 
+import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch.ResultSet;
 
-import utils.OccurenceCounter;
-
+/**
+ * Wrapper class for a graph.
+ * @author Jens Schneider
+ *
+ */
 public class WTPGraph {
 	private Graph graph;
 	private Map<String,String> requestNodes;

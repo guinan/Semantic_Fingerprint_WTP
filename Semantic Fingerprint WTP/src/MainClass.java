@@ -60,7 +60,7 @@ public class MainClass {
 		KeyWordSearch s = new KeyWordSearch();
 		List<SearchResult> res = s.search(keywords, maxSearchResults, correspondingKeywords); 
  		System.out.println(res);
-		List<String> request = KeyWordSearch.toUriList(res); // TODO: use them as input for the next algorithm
+		List<String> request = KeyWordSearch.toUriList(res);
 		// b) Create the Graph
 		/*List<String> request = new LinkedList<String>();
 		request.add("http://dbpedia.org/resource/Haskell_(programming_language)");

@@ -14,13 +14,13 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 
 import connector.DBPediaEndpoint;
 import connector.SparqlQueryExecuter;
-import dbpedia.KeyWordSearch.SearchResult;
 
 /**
  * Make a Keywordsearch to the dbpedia lookup located at:
  * http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?QueryString=query_string
  * Note that this class used caching to store search results.
- *
+ * 
+ * @author Christian Nywelt
  */
 public class KeyWordSearch {
 	private final int defaultMaxResultSize = 10;
