@@ -5,6 +5,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
+/**
+ * Counts the occurrences of elements.
+ * @author Christian Nywelt
+ *
+ */
 public final class OccurenceCounter<T> extends HashMap<T, Integer> {
 	/**
 	 * 
@@ -51,9 +56,9 @@ public final class OccurenceCounter<T> extends HashMap<T, Integer> {
 	
 	@Override
 	public String toString() {
-		StringBuilder st = new StringBuilder("{");
+		final StringBuilder st = new StringBuilder("{");
 		if (!this.isEmpty()) {
-			ArrayList<T> sortedKeys = getSortedKeysByOccurence();
+			final ArrayList<T> sortedKeys = getSortedKeysByOccurence();
 			for (T key : sortedKeys) {
 				st.append(key + ": " + this.get(key) + ", ");
 			}

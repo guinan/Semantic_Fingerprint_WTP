@@ -11,9 +11,10 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 
 /**
+ * Implements a SparQL Query connector.
  * https://github.com/dbpedia-spotlight/dbpedia-spotlight/blob/master/core/src/main/java/org/dbpedia/spotlight/sparql/SparqlQueryExecuter.java
  * 
- * @author Chris
+ * @author Christian Nywelt
  *
  */
 public class SparqlQueryExecuter {
