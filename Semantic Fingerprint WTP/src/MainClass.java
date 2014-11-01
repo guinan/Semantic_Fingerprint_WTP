@@ -10,9 +10,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.graph.Node;
+
 
 import com.hp.hpl.jena.tdb.store.Hash;
 
@@ -27,13 +30,73 @@ import dbpedia.KeyWordSearch.SearchResult;
 public class MainClass {
 	// Request to DBPedia
 	public static final int maxSearchResults = 10;
-	public static final int maxSearchDepth = 2;
+	public static final int maxSearchDepth = 3;
 	// Initial cleaning of the graph
 	public static final int maxPathLength = maxSearchDepth;
 	public static final int maxPathExtensionLength = 1;
 	// Heuristics
-	public static final int numRelevantNodesFilter = 100;
+	public static final int numRelevantNodesFilter = 300;
 	public static final int minSupportNodesFilter = 300;
+	
+	
+	private static LinkedList<String> keywords1(){
+		LinkedList<String> keywords = new LinkedList<String>();
+		keywords.add("Haskell");
+		keywords.add("induction");
+		keywords.add("foldr");
+		keywords.add("fold");
+		keywords.add("higher order function");
+		keywords.add("prove");
+		
+		return keywords;
+	}
+	
+	private static LinkedList<String> keywords10(){
+		LinkedList<String> keywords = new LinkedList<String>();
+		keywords.add("Götz_Alsmann");
+		keywords.add("University_of_Münster");
+		keywords.add("Jazz");
+//		keywords.add("Brandenburger-Tor");
+//		keywords.add("Hauptstadt");
+	
+		
+		return keywords;
+	}
+	
+	private static LinkedList<String> keywords0(){
+		LinkedList<String> keywords = new LinkedList<String>();
+		keywords.add("NP complete");
+		keywords.add("NP");
+		keywords.add("computer science");
+		keywords.add("theory");
+	
+		return keywords;
+	}
+	
+	private static LinkedList<String> keywords2(){
+		LinkedList<String> keywords = new LinkedList<String>();
+		keywords.add("Haskell");
+		keywords.add("span");
+		keywords.add("takewhile");
+		keywords.add("dropwhile");
+		keywords.add("proof");
+		keywords.add("induction");
+		keywords.add("program");
+		keywords.add("properties");
+				
+		return keywords;
+	}
+	
+	private static LinkedList<String> keywords3(){
+		LinkedList<String> keywords = new LinkedList<String>();
+		keywords.add("Haskell");
+		keywords.add("foldr");
+		keywords.add("fold");
+		keywords.add("foldl");
+		keywords.add("higher order function");
+		
+		return keywords;
+	}
 	
 	/**
 	 * 
@@ -41,17 +104,11 @@ public class MainClass {
 	 */
 	public static void main(String[] args) {
 		// a) Serach for concepts
-		LinkedList<String> keywords = new LinkedList<String>();
+		LinkedList<String> keywords = keywords1();
 		//keywords.add("Haskell");
 		//keywords.add("C++");
 		//keywords.add("Java");
-		
-		keywords.add("Haskell");
-		keywords.add("induction");
-		keywords.add("foldr");
-		keywords.add("fold");
-		keywords.add("higher order function");
-		keywords.add("prove");
+
 
 		
 		// map for the semantic concepts found in the ontology and their corresponding keyword, used for searching them
@@ -107,9 +164,13 @@ public class MainClass {
 		
 		// --4.2) tidy the second
 		
+		tidyPaths(paths, correspondingKeywords);
+		
 		NodeRelevanceByIncludingPaths heuristic = new NodeRelevanceByIncludingPaths();
 		heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter, correspondingKeywords);
 
+
+		
 		//heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter);
 		//heuristic.filterByNumberOfPaths(graph, paths, minSupportNodesFilter);
 		//heuristic.filterByNumberOfPaths(graph, paths, 200);
@@ -151,6 +212,30 @@ public class MainClass {
 	}
 	
 	
+	private static void tidyPaths(LinkedList<Path> paths,
+			Map<String, String> correspondingKeywords) {
+		LinkedList<Path> toDeletePath = new LinkedList<Path>();
+		for(Path path : paths){
+			OccurenceCounter<String> test = new OccurenceCounter<String>();
+			for(Node tmpNode : path){
+				test.inc(correspondingKeywords.get(tmpNode.getId()));
+			}
+			boolean added = false;
+			for(Entry<String, Integer> e : test.entrySet()){
+				if(e.getValue() > 1 && !added){
+					toDeletePath.add(path);
+					added = true;
+				}
+				System.out.println("DELDELDEL  ");
+			}
+		}
+		System.out.println(paths.size());
+		System.out.println(toDeletePath.size());
+		
+		paths.removeAll(toDeletePath);
+		
+	}
+
 	/**
 	 * Testgraph #1
 	 */
