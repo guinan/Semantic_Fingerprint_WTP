@@ -4,6 +4,7 @@ import graph.WTPGraph;
 import graph.GraphCleaner.Path;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,7 +39,11 @@ public class NodeRelevanceByIncludingPaths {
 		findNMostRelevant(graph, maxNumber);
 		//filerBiggestCluster(graph);
 		filterClusterWithMostCorrespondingKeywords(graph, correspondingKeywords);
-		findNMostRelevant2(graph, 10);
+		//findNMostRelevant2(graph, 12);
+		
+		for(Node nod : graph.getGraph().getNodeSet()){
+			System.out.println("ANZ: "+nod.getId()+"  "+numberOfIncludingPaths.get(nod.getId()));
+		}
 
 	}
 	
@@ -247,18 +252,28 @@ public class NodeRelevanceByIncludingPaths {
 	private void findNMostRelevant(WTPGraph graph, int maxNumber) {
 		List<Integer> ints = new ArrayList<Integer>();
 		for(String key : numberOfIncludingPaths.keySet()){
-			ints.add(numberOfIncludingPaths.get(key));	
+			Integer tmpInt = numberOfIncludingPaths.get(key);
+			if(tmpInt != null)
+				ints.add(tmpInt);	
 		}
 		Collections.sort(ints,Collections.reverseOrder());
 		int count = 0;
-		for(Integer in : ints){
-			count++;
-			if(count > maxNumber){
-				removeUnrelevantNodes(graph, in);
-				return;
-			}
-		}
 		
+		if(ints == null || ints.isEmpty())
+			return;
+		if(ints.size() <= maxNumber){
+			int minSupport = ints.get(ints.size()-1);
+			removeUnrelevantNodes(graph, minSupport);
+		}
+		else{
+			for(Integer in : ints){
+				count++;
+				if(count > maxNumber){
+					removeUnrelevantNodes(graph, in);
+					return;
+				}
+			}
+		}		
 	}
 	
 	/**
@@ -268,13 +283,27 @@ public class NodeRelevanceByIncludingPaths {
 	 */
 	private void removeUnrelevantNodes(WTPGraph graph, int relevanceThreshold) {
 		if(numberOfIncludingPaths != null){
+			LinkedList<Node> toDelete = new LinkedList<Node>();
+			for(Node node : graph.getGraph().getNodeSet()){
+				Integer tmpInt = numberOfIncludingPaths.get(node.getId());
+				if(tmpInt == null || tmpInt < relevanceThreshold)
+					toDelete.add(node);
+					
+			}
+			for(Node delNode : toDelete)
+				graph.getGraph().removeNode(delNode.getId());
+			
+			System.out.println("nodes filtered by number of including paths heuristic");
+		}		
+		/*if(numberOfIncludingPaths != null){
 			for(String key : numberOfIncludingPaths.keySet()){
-				if(numberOfIncludingPaths.get(key) <= relevanceThreshold)
+				Integer tmpInt = numberOfIncludingPaths.get(key);
+				if(tmpInt == null || tmpInt <= relevanceThreshold)
 					graph.getGraph().removeNode(key);
 					
 			}
 			System.out.println("nodes filtered by number of including paths heuristic");
-		}
+		}*/
 	}
 
 	private void generateCountingIncludingPathMap(List<Path> paths) {
