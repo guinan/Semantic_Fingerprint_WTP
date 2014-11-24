@@ -1,3 +1,4 @@
+import filterheuristics.InterConceptConntecting;
 import filterheuristics.NodeRelevanceByIncludingPaths;
 import graph.GraphCleaner;
 import graph.GraphCleaner.ExtendedPath;
@@ -15,6 +16,7 @@ import java.util.Map.Entry;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.graph.Node;
+
 
 
 import com.hp.hpl.jena.tdb.store.Hash;
@@ -35,8 +37,8 @@ public class MainClass {
 	public static final int maxPathLength = maxSearchDepth;
 	public static final int maxPathExtensionLength = 1;
 	// Heuristics
-	public static final int numRelevantNodesFilter = 300;
-	public static final int minSupportNodesFilter = 300;
+	public static final int numRelevantNodesFilter = 10;
+	public static final int minSupportNodesFilter = 5;
 	
 	
 	private static LinkedList<String> keywords1(){
@@ -104,7 +106,7 @@ public class MainClass {
 	 */
 	public static void main(String[] args) {
 		// a) Serach for concepts
-		LinkedList<String> keywords = keywords1();
+		LinkedList<String> keywords = keywords0();
 		//keywords.add("Haskell");
 		//keywords.add("C++");
 		//keywords.add("Java");
@@ -164,12 +166,13 @@ public class MainClass {
 		
 		// --4.2) tidy the second
 		
-		tidyPaths(paths, correspondingKeywords);
 		
-		NodeRelevanceByIncludingPaths heuristic = new NodeRelevanceByIncludingPaths();
-		heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter, correspondingKeywords);
+		InterConceptConntecting heuristic = new InterConceptConntecting();
 
+		heuristic.filter(graph, paths, correspondingKeywords);
+		heuristic.filterBestN(graph, paths, numRelevantNodesFilter, correspondingKeywords);
 
+		
 		
 		//heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter);
 		//heuristic.filterByNumberOfPaths(graph, paths, minSupportNodesFilter);
@@ -212,29 +215,7 @@ public class MainClass {
 	}
 	
 	
-	private static void tidyPaths(LinkedList<Path> paths,
-			Map<String, String> correspondingKeywords) {
-		LinkedList<Path> toDeletePath = new LinkedList<Path>();
-		for(Path path : paths){
-			OccurenceCounter<String> test = new OccurenceCounter<String>();
-			for(Node tmpNode : path){
-				test.inc(correspondingKeywords.get(tmpNode.getId()));
-			}
-			boolean added = false;
-			for(Entry<String, Integer> e : test.entrySet()){
-				if(e.getValue() > 1 && !added){
-					toDeletePath.add(path);
-					added = true;
-				}
-				System.out.println("DELDELDEL  ");
-			}
-		}
-		System.out.println(paths.size());
-		System.out.println(toDeletePath.size());
-		
-		paths.removeAll(toDeletePath);
-		
-	}
+
 
 	/**
 	 * Testgraph #1
