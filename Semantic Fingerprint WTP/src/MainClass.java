@@ -1,5 +1,4 @@
 import filterheuristics.InterConceptConntecting;
-import filterheuristics.NodeRelevanceByIncludingPaths;
 import graph.GraphCleaner;
 import graph.GraphCleaner.ExtendedPath;
 import graph.GraphCleaner.ImplicitPath;
@@ -11,21 +10,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.graph.Node;
 
-
-
-import com.hp.hpl.jena.tdb.store.Hash;
-
-import scala.collection.parallel.ParSeqLike.Corresponds;
 import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch;
-import dbpedia.KeyWordSearch;
 import dbpedia.BreadthFirstSearch.ResultSet;
+import dbpedia.KeyWordSearch;
 import dbpedia.KeyWordSearch.SearchResult;
 
 
@@ -164,22 +155,36 @@ public class MainClass {
 		LinkedList<Path> paths = c.clean(maxPathLength, maxPathExtensionLength);
 		System.out.println(" Done (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges, "+ paths.size() +" Paths)");
 		
-		// --4.2) tidy the second
+		// --4.2) heuristics finger print selection
 		
 		
 		InterConceptConntecting heuristic = new InterConceptConntecting();
 
-		heuristic.filter(graph, paths, correspondingKeywords);
-		heuristic.filterBestN(graph, paths, numRelevantNodesFilter, correspondingKeywords);
-
+		/**
+		 * Filters all Nodes that have paths to other Nodes which correspond to a different keyword
+		 */
+		heuristic.filterInterconntection(graph, paths, correspondingKeywords);
 		
+		/**
+		 * Filters the n Nodes which occur most frequently in the paths
+		 */
+		//heuristic.filterNMostFrequentlyOccuring(graph, paths, 6, correspondingKeywords);
 		
-		//heuristic.filterTheNMostVisited(graph, paths, numRelevantNodesFilter);
-		//heuristic.filterByNumberOfPaths(graph, paths, minSupportNodesFilter);
-		//heuristic.filterByNumberOfPaths(graph, paths, 200);
-
+		/**
+		 *  Selects the cluster which corresponds to the most different keywords
+		 */
+		heuristic.filterClusterByInterconnectionLevel(graph, correspondingKeywords);
 		
-	
+		/**
+		 * Selects the biggest cluster
+		 */
+		heuristic.filterClusterBySize(graph);
+		
+		/**
+		 * Selects the cluster whose nodes occur most frequently in the paths
+		 */
+		//heuristic.filterClusterByNodeOccurrencesInPaths(graph, paths);
+		
 		
 		
 		// --4.3) colorize Graph
