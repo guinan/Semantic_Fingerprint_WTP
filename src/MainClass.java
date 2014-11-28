@@ -97,7 +97,7 @@ public class MainClass {
 	 */
 	public static void main(String[] args) {
 		// a) Serach for concepts
-		LinkedList<String> keywords = keywords0();
+		LinkedList<String> keywords = keywords1();
 		//keywords.add("Haskell");
 		//keywords.add("C++");
 		//keywords.add("Java");
@@ -168,7 +168,7 @@ public class MainClass {
 		/**
 		 * Filters the n Nodes which occur most frequently in the paths
 		 */
-		//heuristic.filterNMostFrequentlyOccuring(graph, paths, 6, correspondingKeywords);
+		//heuristic.filterNMostFrequentlyOccuring(graph, paths, numRelevantNodesFilter, correspondingKeywords);
 		
 		/**
 		 *  Selects the cluster which corresponds to the most different keywords
