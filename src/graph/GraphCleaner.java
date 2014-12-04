@@ -53,6 +53,8 @@ public class GraphCleaner {
 	 * 
 	 */
 	public static class Path extends LinkedList<Node> implements Comparable<Path> {
+		private static final long serialVersionUID = -570474022335254371L;
+
 		/**
 		 * 
 		 * @param nodes
@@ -161,12 +163,12 @@ public class GraphCleaner {
 		}
 		//System.out.println("--- Linking Nodes:");
 		
-		// 3) fill the other lists and serach for connector nodes
+		// 3) fill the other lists and search for connector nodes
 		for (int level = 0; level < maxDepth; level++) {
 			for (int idxNode = 0; idxNode < numRequestNodes; idxNode++) {
 				// get all adjacent node for each node in this list
 				HashSet<Node> levelNodes = bfsMem.getList(idxNode, level);
-				HashSet<Node> nextLevelNodes = bfsMem.getList(idxNode, level+1);
+				HashSet<Node> nextLevelNodes = bfsMem.getList(idxNode, level+1); // is empty at this point
 				
 				for(Node n : levelNodes) {
 					if ((maxExtensionLength == 0) && level != 0 && bfsMem.seenNodes.get(n) > 0) continue; // just for performance improvements

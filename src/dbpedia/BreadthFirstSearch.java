@@ -40,6 +40,8 @@ public class BreadthFirstSearch {
 	
 	private final SparqlQueryExecuter queryExecuter = new DBPediaEndpoint();
 	
+	public boolean useCaching = true;
+	
 	/**
 	 * 
 	 * @author Chris
@@ -278,7 +280,7 @@ public class BreadthFirstSearch {
 		System.out.println("Analysing node: " + resource.resourceURI);
 		
 		// check cache
-		AnalysedNode cachedNode = cache.get(resource.resourceURI);
+		AnalysedNode cachedNode = useCaching ? cache.get(resource.resourceURI) : null;
 		if (cachedNode != null) {
 			for(int i = 0; i < cachedNode.edges.size(); i++) {
 				String resName = cachedNode.targetResourceNames.get(i);
