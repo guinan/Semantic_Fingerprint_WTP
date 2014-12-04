@@ -18,7 +18,7 @@ import connector.SparqlQueryExecuter;
 /**
  * Make a Keywordsearch to the dbpedia lookup located at:
  * http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?QueryString=query_string
- * Note that this class used caching to store search results.
+ * Note that this class uses caching to store search results.
  * 
  * @author Christian Nywelt
  */
@@ -26,6 +26,7 @@ public class KeyWordSearch {
 	private final int defaultMaxResultSize = 10;
 	
 	private final SparqlQueryExecuter queryExecuter = new DBPediaEndpoint();
+	public boolean useCaching = true;
 	
 	FileCache<SerializedResult> cache = new FileCache<SerializedResult>("KeyWordSearch");
 	
@@ -144,7 +145,7 @@ public class KeyWordSearch {
 	 */
 	public List<SearchResult> search(String keyword, int limit) {
 		SerializedResult cacheHit = cache.get(keyword);
-		if (cacheHit != null && cacheHit.searchLimit >= limit) {
+		if (useCaching && cacheHit != null && cacheHit.searchLimit >= limit) {
 			List<SearchResult> res = cacheHit.getShrinkedResult(limit);
 			return res;
 		}
