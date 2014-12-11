@@ -6,6 +6,8 @@ import graph.GraphCleaner.Path;
 import graph.WTPGraph;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,78 +32,71 @@ public class MainClass {
 	// Heuristics
 	public static final int numRelevantNodesFilter = 10;
 	public static final int minSupportNodesFilter = 5;
+	// keyWords
+	public static final ArrayList<LinkedList<String>> keywordList = new ArrayList<LinkedList<String>>();
 	
-	
-	private static LinkedList<String> keywords1(){
-		LinkedList<String> keywords = new LinkedList<String>();
-		keywords.add("Haskell");
-		keywords.add("induction");
-		keywords.add("foldr");
-		keywords.add("fold");
-		keywords.add("higher order function");
-		keywords.add("prove");
+	static {
+		// keywords 0
+		addKeywords(new String[] {
+				"Haskell",
+				"induction",
+				"foldr",
+				"fold",
+				"higher order function",
+				"prove"
+			});
 		
-		return keywords;
-	}
+		// keywords 1
+		addKeywords(new String[] {
+				"Götz_Alsmann",
+				"University_of_Münster",
+				"Jazz",
+				"Brandenburger-Tor",
+				"Hauptstadt"
+			});
 	
-	private static LinkedList<String> keywords10(){
-		LinkedList<String> keywords = new LinkedList<String>();
-		keywords.add("Götz_Alsmann");
-		keywords.add("University_of_Münster");
-		keywords.add("Jazz");
-//		keywords.add("Brandenburger-Tor");
-//		keywords.add("Hauptstadt");
-	
+		// keywords 2
+		addKeywords(new String[] {
+				"NP complete",
+				"NP",
+				"computer science",
+				"theory"
+		});
 		
-		return keywords;
-	}
-	
-	private static LinkedList<String> keywords0(){
-		LinkedList<String> keywords = new LinkedList<String>();
-		keywords.add("NP complete");
-		keywords.add("NP");
-		keywords.add("computer science");
-		keywords.add("theory");
-	
-		return keywords;
-	}
-	
-	private static LinkedList<String> keywords2(){
-		LinkedList<String> keywords = new LinkedList<String>();
-		keywords.add("Haskell");
-		keywords.add("span");
-		keywords.add("takewhile");
-		keywords.add("dropwhile");
-		keywords.add("proof");
-		keywords.add("induction");
-		keywords.add("program");
-		keywords.add("properties");
-				
-		return keywords;
-	}
-	
-	private static LinkedList<String> keywords3(){
-		LinkedList<String> keywords = new LinkedList<String>();
-		keywords.add("Haskell");
-		keywords.add("foldr");
-		keywords.add("fold");
-		keywords.add("foldl");
-		keywords.add("higher order function");
+		// keywords 3
+		addKeywords(new String[] {
+				"Haskell",
+				"span",
+				"takewhile",
+				"dropwhile",
+				"proof",
+				"induction",
+				"program",
+				"properties"
+		});
 		
-		return keywords;
+		// keywords 4
+		addKeywords(new String[] {
+				"scheduling",
+				"simulated annealing",
+				"tabu search",
+				"optimization",
+				"jobshop scheduling",
+				"heuristics",
+				"local search",
+				"hybrid algorithms"
+		});
 	}
+	
+	
 	
 	/**
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// a) Serach for concepts
-		LinkedList<String> keywords = keywords1();
-		//keywords.add("Haskell");
-		//keywords.add("C++");
-		//keywords.add("Java");
-
+		// a) Search for concepts
+		LinkedList<String> keywords = keywordList.get(0);
 
 		
 		// map for the semantic concepts found in the ontology and their corresponding keyword, used for searching them
@@ -111,16 +106,9 @@ public class MainClass {
 		List<SearchResult> res = s.search(keywords, maxSearchResults, correspondingKeywords); 
  		System.out.println(res);
 		List<String> request = KeyWordSearch.toUriList(res);
-		// b) Create the Graph
-		/*List<String> request = new LinkedList<String>();
-		request.add("http://dbpedia.org/resource/Haskell_(programming_language)");
-		request.add("http://dbpedia.org/resource/C++");
-		request.add("http://dbpedia.org/resource/Java_(programming_language)");*/
-		//request.add("http://dbpedia.org/page/ML_(programming_language)"); //According to RelFinder there should be a connection!
 		
+		// b) Create the Graph		
 		generateGraph(request, maxSearchDepth, correspondingKeywords);
-		
-		
 	}
 	
 	/**
@@ -156,8 +144,6 @@ public class MainClass {
 		System.out.println(" Done (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges, "+ paths.size() +" Paths)");
 		
 		// --4.2) heuristics finger print selection
-		
-		
 		InterConceptConntecting heuristic = new InterConceptConntecting();
 
 		/**
@@ -219,7 +205,13 @@ public class MainClass {
 		
 	}
 	
-	
+	/**
+	 * Add keywords to the keywordList
+	 * @param arr
+	 */
+	private static void addKeywords(String arr[]) {
+		keywordList.add(new LinkedList<String>(Arrays.asList(arr)));
+	}
 
 
 	/**
