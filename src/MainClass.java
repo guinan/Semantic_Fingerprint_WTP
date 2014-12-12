@@ -16,6 +16,8 @@ import java.util.Map;
 import org.graphstream.graph.Graph;
 
 import utils.OccurenceCounter;
+import utils.PowerSetGenerator;
+import utils.PowerSetGenerator.PowerSetIterator;
 import dbpedia.BreadthFirstSearch;
 import dbpedia.BreadthFirstSearch.ResultSet;
 import dbpedia.KeyWordSearch;
@@ -25,7 +27,7 @@ import dbpedia.KeyWordSearch.SearchResult;
 public class MainClass {
 	// Request to DBPedia
 	public static final int maxSearchResults = 10;
-	public static final int maxSearchDepth = 3;
+	public static final int maxSearchDepth = 4;
 	// Initial cleaning of the graph
 	public static final int maxPathLength = maxSearchDepth;
 	public static final int maxPathExtensionLength = 1;
@@ -96,9 +98,32 @@ public class MainClass {
 	 */
 	public static void main(String[] args) {
 		// a) Search for concepts
-		LinkedList<String> keywords = keywordList.get(0);
-
+		//LinkedList<String> keywords = keywordList.get(0);
+		//processKeyWords(keywords).display();
 		
+		// a) testing
+		doTests();
+	}
+	
+	protected static void doTests() {
+		LinkedList<String> keywords = keywordList.get(0);
+		// iterate power set
+		for (int i = keywords.size(); i > 0; i--) {
+			PowerSetGenerator<String> psg = new PowerSetGenerator<String>(i, keywords, String.class);
+			for(String[] l : psg) {
+				WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(l)));
+				Arrays.toString(l);
+				g.display();
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param keywords
+	 * @return 
+	 */
+	protected static WTPGraph processKeyWords(LinkedList<String> keywords) {
 		// map for the semantic concepts found in the ontology and their corresponding keyword, used for searching them
 		Map<String, String> correspondingKeywords = new HashMap<String, String>();
 		
@@ -107,8 +132,8 @@ public class MainClass {
  		System.out.println(res);
 		List<String> request = KeyWordSearch.toUriList(res);
 		
-		// b) Create the Graph		
-		generateGraph(request, maxSearchDepth, correspondingKeywords);
+		// b) Create the Graph
+		return generateGraph(request, maxSearchDepth, correspondingKeywords);
 	}
 	
 	/**
@@ -116,7 +141,7 @@ public class MainClass {
 	 * @param request
 	 * @throws FileNotFoundException 
 	 */
-	public static void generateGraph(List<String> request, int searchDepth, Map<String, String> correspondingKeywords) {
+	public static WTPGraph generateGraph(List<String> request, int searchDepth, Map<String, String> correspondingKeywords) {
 		// -- 1) get connections
 		System.out.println("Starting BFS...");
 		BreadthFirstSearch lc = new BreadthFirstSearch();
@@ -201,8 +226,7 @@ public class MainClass {
 
 		// -- 7) display graph
 		System.out.println("-- Displaying graph...");
-		graph.display();
-		
+		return graph;
 	}
 	
 	/**

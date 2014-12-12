@@ -103,7 +103,7 @@ public class WTPGraph {
 	public void display(){
 		Viewer viewer = graph.display(true);
 		View view = viewer.getDefaultView();
-		view.resizeFrame(800, 600);
+		view.resizeFrame(1024, 800);
 		
 		//view.setViewCenter(440000, 2503000, 0);
 		//view.setViewPercent(0.25);
