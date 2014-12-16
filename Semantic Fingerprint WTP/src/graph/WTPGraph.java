@@ -1,6 +1,7 @@
 package graph;
 
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -11,8 +12,12 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.stream.file.FileSink;
+import org.graphstream.stream.file.FileSinkSVG2;
+import org.graphstream.ui.layout.springbox.implementations.SpringBox;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
+import org.graphstream.ui.swingViewer.Viewer.CloseFramePolicy;
 
 import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch.ResultSet;
@@ -96,12 +101,16 @@ public class WTPGraph {
 		graphD.display();
 	}
 	
+	public void display(){
+		this.display(false);
+	}
 	
 	/**
 	 * 
 	 */
-	public void display(){
+	public void display(boolean exitOnClose){
 		Viewer viewer = graph.display(true);
+		if (!exitOnClose) viewer.setCloseFramePolicy(CloseFramePolicy.CLOSE_VIEWER);
 		View view = viewer.getDefaultView();
 		view.resizeFrame(1024, 800);
 		
@@ -109,7 +118,39 @@ public class WTPGraph {
 		//view.setViewPercent(0.25);
 		
 		//graph.display();
+	}
+	
+	/**
+	 * Saves the graph to an svg image file.
+	 * @param file The absolute path to the file. For example "C:\\test.svg"
+	 * @throws IOException 
+	 */
+	public void saveToSVG(String file) throws IOException {
+		SpringBox sb = new SpringBox();
+		// add inital positions
+		int i = 0;
+		for (Node n : graph.getNodeSet()) {
+			n.setAttribute("x", i);
+			n.setAttribute("y", i);
+		}
 		
+		// then apply the positioning algorithm
+		graph.addSink(sb);
+		sb.addAttributeSink(graph);
+		
+		
+		sb.shake();
+		// compute the layout
+		do {
+			sb.compute();
+		} while (sb.getStabilization() < 0.9);
+		
+		// remove layout sink
+		graph.removeSink(sb);
+		sb.removeAttributeSink(graph);
+		// save to file
+		FileSink out = new FileSinkSVG2();
+		out.writeAll(graph, file);
 	}
 	
 	
