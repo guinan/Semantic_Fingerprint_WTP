@@ -276,9 +276,7 @@ public class BreadthFirstSearch {
 	 * @param resourceURI
 	 * @return
 	 */
-	protected void analyseNode(Node resource) {
-		System.out.println("Analysing node: " + resource.resourceURI);
-		
+	protected void analyseNode(Node resource) {		
 		// check cache
 		AnalysedNode cachedNode = useCaching ? cache.get(resource.resourceURI) : null;
 		if (cachedNode != null) {
@@ -296,6 +294,7 @@ public class BreadthFirstSearch {
 			readFromCache++;
 		} else { // load from DBPedia online
 			requestedOnline++;
+			System.out.println("Analysing node: " + resource.resourceURI);
 			//System.out.print("Loading data from DBPedia...");
 			cachedNode = new AnalysedNode();
 			

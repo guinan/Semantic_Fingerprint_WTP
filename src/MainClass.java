@@ -5,7 +5,10 @@ import graph.GraphCleaner.ImplicitPath;
 import graph.GraphCleaner.Path;
 import graph.WTPGraph;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,7 +30,7 @@ import dbpedia.KeyWordSearch.SearchResult;
 public class MainClass {
 	// Request to DBPedia
 	public static final int maxSearchResults = 10;
-	public static final int maxSearchDepth = 4;
+	public static final int maxSearchDepth = 3;
 	// Initial cleaning of the graph
 	public static final int maxPathLength = maxSearchDepth;
 	public static final int maxPathExtensionLength = 1;
@@ -98,22 +101,50 @@ public class MainClass {
 	 */
 	public static void main(String[] args) {
 		// a) Search for concepts
-		//LinkedList<String> keywords = keywordList.get(0);
-		//processKeyWords(keywords).display();
+		LinkedList<String> keywords = keywordList.get(0);
+		WTPGraph g = processKeyWords(keywords);
+		System.out.println(keywords);
+		g.display();
 		
 		// a) testing
-		doTests();
+//		doTests();
 	}
 	
 	protected static void doTests() {
 		LinkedList<String> keywords = keywordList.get(0);
+		InputStreamReader in = new InputStreamReader(System.in);
 		// iterate power set
-		for (int i = keywords.size(); i > 0; i--) {
-			PowerSetGenerator<String> psg = new PowerSetGenerator<String>(i, keywords, String.class);
+		int maxNumKWs = Math.min(6, keywords.size());
+		int minNumKWs = Math.min(3, keywords.size());
+		
+		// run all combinations
+		for (int i = maxNumKWs; i > minNumKWs; i--) {
+			String[] arr = keywords.toArray(new String[keywords.size()]);
+			PowerSetGenerator<String> psg = new PowerSetGenerator<String>(i, arr);
+			// iterate all powersets with k = i
 			for(String[] l : psg) {
 				WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(l)));
-				Arrays.toString(l);
-				g.display();
+				
+				// save to svg image
+				final String path = "C:\\Users\\Chris\\Desktop\\test\\";
+				String file = path + Arrays.toString(l) + ".svg";
+				System.out.println("Saving graph to file \"" + file + "\"");
+				try {
+					g.saveToSVG(file);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
+				}
+				
+//				System.out.println(Arrays.toString(l));
+//				g.display(false);
+//				try {
+//					System.out.println("Press enter to continue...");
+//					// pause until finished watching
+//					in.read();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
 			}
 		}
 	}
@@ -150,7 +181,7 @@ public class MainClass {
 		
 		// -- 2) create the graph
 		System.out.println("Creating the initial graph...");
-		WTPGraph graph = WTPGraph.createFromResultSet(res, "Testgraph");
+		WTPGraph graph = WTPGraph.createFromResultSet(res, "Semantic Fingerprint");
 		System.out.println("...Done");
 		
 		// -- 3) remove specific edges
@@ -196,8 +227,6 @@ public class MainClass {
 		 */
 		//heuristic.filterClusterByNodeOccurrencesInPaths(graph, paths);
 		
-		
-		
 		// --4.3) colorize Graph
 		
 		//graph.colorizeDFS(res.requestNodes);
@@ -218,7 +247,7 @@ public class MainClass {
 		System.out.println("Kurze Pfade: " + types[0]);
 		System.out.println("Erweiterte Pfade: " + types[1]);
 		System.out.println("Implizite Pfade: " + types[2]);
-		System.out.println("Pfadlï¿½ngen: " + counter);
+		System.out.println("Pfadlängen: " + counter);
 		
 		System.out.println("-- Displaying edge statistics");
 		OccurenceCounter<String> edgeStats = graph.getEdgeOccurences();

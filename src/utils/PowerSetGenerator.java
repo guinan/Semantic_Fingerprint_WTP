@@ -50,7 +50,7 @@ public class PowerSetGenerator<T> implements Iterable<T[]> {
     	this.sampleSize = sampleSize;
     	
         this.input = (T[]) java.lang.reflect.Array.newInstance(
-            input.getClass().getComponentType(), sampleSize);
+            input.getClass().getComponentType(), input.size());
     	int i = 0;
     	for (T e : input) {
     		this.input[i++] = e;
@@ -69,7 +69,7 @@ public class PowerSetGenerator<T> implements Iterable<T[]> {
     	this.sampleSize = sampleSize;
     	
         this.input = (T[]) java.lang.reflect.Array.newInstance(
-            classOfT, sampleSize);
+            classOfT, input.size());
     	int i = 0;
     	for (T e : input) {
     		this.input[i++] = e;
