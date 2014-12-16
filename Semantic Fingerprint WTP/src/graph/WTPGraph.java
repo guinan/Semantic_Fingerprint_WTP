@@ -150,9 +150,11 @@ public class WTPGraph {
             outFile.mkdirs();
             ImageIO.write(image, "png", outFile);
         }
-        catch(Exception exception)
+        catch(Exception e)
         {
-            //code
+        	e.printStackTrace();
+        	System.out.println("Probably you can handle that error just by rerunning the application (with the same parameters). Don't know why but it helped me ;)");
+            System.exit(0);
         }
 		
 		//viewer.close();
