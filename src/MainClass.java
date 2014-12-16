@@ -30,13 +30,16 @@ import dbpedia.KeyWordSearch.SearchResult;
 public class MainClass {
 	// Request to DBPedia
 	public static final int maxSearchResults = 10;
-	public static final int maxSearchDepth = 3;
+	public static final int maxSearchDepth = 2;
 	// Initial cleaning of the graph
 	public static final int maxPathLength = maxSearchDepth;
 	public static final int maxPathExtensionLength = 1;
 	// Heuristics
 	public static final int numRelevantNodesFilter = 10;
 	public static final int minSupportNodesFilter = 5;
+	// Automated Evaluation
+	public final static String outputFolder = "C:\\Users\\Chris\\Desktop\\test\\";
+	
 	// keyWords
 	public static final ArrayList<LinkedList<String>> keywordList = new ArrayList<LinkedList<String>>();
 	
@@ -113,21 +116,20 @@ public class MainClass {
 	
 	protected static void doTests() {
 		LinkedList<String> keywords = keywordList.get(0);
+		String[] arr = keywords.toArray(new String[keywords.size()]);
 		// iterate power set
 		int maxNumKWs = Math.min(6, keywords.size());
 		int minNumKWs = Math.min(3, keywords.size());
 		
 		// run all combinations
 		for (int i = maxNumKWs; i > minNumKWs; i--) {
-			String[] arr = keywords.toArray(new String[keywords.size()]);
 			PowerSetGenerator<String> psg = new PowerSetGenerator<String>(i, arr);
 			// iterate all powersets with k = i
 			for(String[] l : psg) {
 				WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(l)));
 				
 				// save to svg image
-				final String outputFolder = "C:\\Users\\Chris\\Desktop\\test\\";
-				final String path = outputFolder + "Search Depth = " + maxSearchDepth +"\\"+ keywords.size() + " keywords\\";
+				final String path = outputFolder + "Search Depth = " + maxSearchDepth +"\\"+ i + " keywords\\";
 				String file = path + Arrays.toString(l) + ".png";
 				System.out.println("Saving graph to file \"" + file + "\"");
 				g.displaySaveClose(file);
