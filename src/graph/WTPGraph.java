@@ -1,12 +1,19 @@
 package graph;
 
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
@@ -121,7 +128,36 @@ public class WTPGraph {
 	}
 	
 	/**
-	 * Saves the graph to an svg image file.
+	 * Workaround for the not working saveToSVG method
+	 */
+	public void displaySaveClose(String file) {
+		Viewer viewer = graph.display(true);
+		viewer.setCloseFramePolicy(CloseFramePolicy.CLOSE_VIEWER);
+		View view = viewer.getDefaultView();
+		view.resizeFrame(1024, 800);
+		
+		try
+        {
+			Thread.sleep(5000); // wait until nodes are positioned correctly (in another thread)
+            
+			BufferedImage image = new BufferedImage(view.getWidth(), view.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics2D = image.createGraphics();
+            view.paint(graphics2D);
+            
+            File outFile = new File(file);
+            outFile.mkdirs();
+            ImageIO.write(image, "png", outFile);
+        }
+        catch(Exception exception)
+        {
+            //code
+        }
+		viewer.close();
+	}
+	
+	
+	/**
+	 * DOES NOT WORK AS IT SHOULD. Saves the graph to an svg image file.
 	 * @param file The absolute path to the file. For example "C:\\test.svg"
 	 * @throws IOException 
 	 */
