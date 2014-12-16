@@ -112,7 +112,6 @@ public class MainClass {
 	
 	protected static void doTests() {
 		LinkedList<String> keywords = keywordList.get(0);
-		InputStreamReader in = new InputStreamReader(System.in);
 		// iterate power set
 		int maxNumKWs = Math.min(6, keywords.size());
 		int minNumKWs = Math.min(3, keywords.size());
@@ -126,25 +125,17 @@ public class MainClass {
 				WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(l)));
 				
 				// save to svg image
-				final String path = "C:\\Users\\Chris\\Desktop\\test\\";
-				String file = path + Arrays.toString(l) + ".svg";
+				final String path = "C:\\Users\\Chris\\Desktop\\test\\" + keywords.size() + " keywords\\";
+				String file = path + Arrays.toString(l) + ".png";
 				System.out.println("Saving graph to file \"" + file + "\"");
-				try {
-					g.saveToSVG(file);
-				} catch (IOException e) {
-					e.printStackTrace();
-					return;
-				}
-				
-//				System.out.println(Arrays.toString(l));
-//				g.display(false);
+				g.displaySaveClose(file);
 //				try {
-//					System.out.println("Press enter to continue...");
-//					// pause until finished watching
-//					in.read();
+//					g.saveToSVG(file);
 //				} catch (IOException e) {
 //					e.printStackTrace();
+//					return;
 //				}
+				
 			}
 		}
 	}
