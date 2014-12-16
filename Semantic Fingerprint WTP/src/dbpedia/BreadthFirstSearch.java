@@ -111,6 +111,13 @@ public class BreadthFirstSearch {
 			final int idx = "http://dbpedia.org/property/".length();
 			return connectionName.substring(idx).replace("_", " ");
 		}
+		
+		public String getID() {
+			if (idPool >= Integer.MAX_VALUE) idPool = 0;
+			return "" + getName() + (idPool++) + hashCode();
+		}
+		
+		public static int idPool = 0;
 	}
 	
 	/**

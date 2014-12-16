@@ -101,13 +101,14 @@ public class MainClass {
 	 */
 	public static void main(String[] args) {
 		// a) Search for concepts
-		LinkedList<String> keywords = keywordList.get(0);
-		WTPGraph g = processKeyWords(keywords);
-		System.out.println(keywords);
-		g.display();
+//		LinkedList<String> keywords = keywordList.get(0);
+//		WTPGraph g = processKeyWords(keywords);
+//		System.out.println(keywords);
+//		g.display();
+//		System.out.println("Done");
 		
 		// a) testing
-//		doTests();
+		doTests();
 	}
 	
 	protected static void doTests() {
@@ -125,7 +126,8 @@ public class MainClass {
 				WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(l)));
 				
 				// save to svg image
-				final String path = "C:\\Users\\Chris\\Desktop\\test\\" + keywords.size() + " keywords\\";
+				final String outputFolder = "C:\\Users\\Chris\\Desktop\\test\\";
+				final String path = outputFolder + "Search Depth = " + maxSearchDepth +"\\"+ keywords.size() + " keywords\\";
 				String file = path + Arrays.toString(l) + ".png";
 				System.out.println("Saving graph to file \"" + file + "\"");
 				g.displaySaveClose(file);
@@ -138,6 +140,8 @@ public class MainClass {
 				
 			}
 		}
+		System.out.println("Finished test run.");
+		System.exit(0);
 	}
 	
 	/**

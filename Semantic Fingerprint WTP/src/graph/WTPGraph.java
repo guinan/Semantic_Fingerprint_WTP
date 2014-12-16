@@ -22,9 +22,11 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.stream.file.FileSink;
 import org.graphstream.stream.file.FileSinkSVG2;
 import org.graphstream.ui.layout.springbox.implementations.SpringBox;
+import org.graphstream.ui.swingViewer.DefaultView;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
 import org.graphstream.ui.swingViewer.Viewer.CloseFramePolicy;
+import org.graphstream.ui.swingViewer.Viewer.ThreadingModel;
 
 import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch.ResultSet;
@@ -109,7 +111,7 @@ public class WTPGraph {
 	}
 	
 	public void display(){
-		this.display(false);
+		this.display(true);
 	}
 	
 	/**
@@ -152,7 +154,8 @@ public class WTPGraph {
         {
             //code
         }
-		viewer.close();
+		
+		//viewer.close();
 	}
 	
 	
@@ -418,7 +421,7 @@ public class WTPGraph {
 		boolean useDirectedEdges = false;
 		for (dbpedia.BreadthFirstSearch.Edge e : res.edges) {
 			try {
-				Edge edge = graph.getGraph().addEdge(""+ e.hashCode(), e.source.resourceName(), e.dest.resourceName(), useDirectedEdges);
+				Edge edge = graph.getGraph().addEdge(e.getID() + "", e.source.resourceName(), e.dest.resourceName(), useDirectedEdges);
 				edge.setAttribute("ui.label", e.getName());
 			} catch (org.graphstream.graph.EdgeRejectedException err) {
 				//System.out.println("Error: " + err.getMessage());
