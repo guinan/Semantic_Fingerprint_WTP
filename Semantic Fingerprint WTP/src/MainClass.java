@@ -7,8 +7,6 @@ import graph.WTPGraph;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,7 +18,6 @@ import org.graphstream.graph.Graph;
 
 import utils.OccurenceCounter;
 import utils.PowerSetGenerator;
-import utils.PowerSetGenerator.PowerSetIterator;
 import dbpedia.BreadthFirstSearch;
 import dbpedia.BreadthFirstSearch.ResultSet;
 import dbpedia.KeyWordSearch;
@@ -115,23 +112,42 @@ public class MainClass {
 	}
 	
 	protected static void doTests() {
-		LinkedList<String> keywords = keywordList.get(0);
-		String[] arr = keywords.toArray(new String[keywords.size()]);
+		// parameters
+		final int keywordListIdx = 3;
+		final int maxNumKeywords = 6;
+		final int minNumKeywords = 3;
+		final boolean skipIfExists = true;
+		
+		// initalize
+		final LinkedList<String> keywords = keywordList.get(keywordListIdx);
+		final String[] arr = keywords.toArray(new String[keywords.size()]);
 		// iterate power set
-		int maxNumKWs = Math.min(6, keywords.size());
-		int minNumKWs = Math.min(3, keywords.size());
+		final int maxNumKWs = Math.min(maxNumKeywords, keywords.size());
+		final int minNumKWs = Math.min(minNumKeywords, keywords.size());
 		
 		// run all combinations
 		for (int i = maxNumKWs; i > minNumKWs; i--) {
 			PowerSetGenerator<String> psg = new PowerSetGenerator<String>(i, arr);
 			// iterate all powersets with k = i
 			for(String[] l : psg) {
+				// create filename
+				final String path = keywordListIdx + " (" + keywords.get(0) + "..." + keywords.getLast() + ")\\" +
+						"Search Depth = " + maxSearchDepth + "\\" +
+						i + " keywords\\" +
+						Arrays.toString(l) + ".png";
+				final String file = outputFolder + path;
+				
+				// chek if this file already exists
+				if (skipIfExists && new File(file).exists()) {
+					System.out.println("File already exists: " + path);
+					continue;
+				}
+				
+				// generate fingerprint
 				WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(l)));
 				
-				// save to svg image
-				final String path = outputFolder + "Search Depth = " + maxSearchDepth +"\\"+ i + " keywords\\";
-				String file = path + Arrays.toString(l) + ".png";
-				System.out.println("Saving graph to file \"" + file + "\"");
+				// save to iamge
+				System.out.println("Saving graph to file \"" + path + "\"");
 				g.displaySaveClose(file);
 //				try {
 //					g.saveToSVG(file);

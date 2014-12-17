@@ -4,6 +4,7 @@ package graph;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
@@ -22,11 +21,9 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.stream.file.FileSink;
 import org.graphstream.stream.file.FileSinkSVG2;
 import org.graphstream.ui.layout.springbox.implementations.SpringBox;
-import org.graphstream.ui.swingViewer.DefaultView;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
 import org.graphstream.ui.swingViewer.Viewer.CloseFramePolicy;
-import org.graphstream.ui.swingViewer.Viewer.ThreadingModel;
 
 import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch.ResultSet;
@@ -150,11 +147,13 @@ public class WTPGraph {
             outFile.mkdirs();
             ImageIO.write(image, "png", outFile);
         }
-        catch(Exception e)
-        {
-        	e.printStackTrace();
+		catch (FileNotFoundException | NullPointerException e) {
+			e.printStackTrace();
         	System.out.println("Probably you can handle that error just by rerunning the application (with the same parameters). Don't know why but it helped me ;)");
             System.exit(0);
+		} catch(Exception e) {
+        	e.printStackTrace();
+        	System.exit(0);
         }
 		
 		//viewer.close();
