@@ -5,7 +5,6 @@ import graph.GraphCleaner.ImplicitPath;
 import graph.GraphCleaner.Path;
 import graph.WTPGraph;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +16,6 @@ import java.util.Map;
 import org.graphstream.graph.Graph;
 
 import utils.OccurenceCounter;
-import utils.PowerSetGenerator;
 import dbpedia.BreadthFirstSearch;
 import dbpedia.BreadthFirstSearch.ResultSet;
 import dbpedia.KeyWordSearch;
@@ -27,15 +25,13 @@ import dbpedia.KeyWordSearch.SearchResult;
 public class MainClass {
 	// Request to DBPedia
 	public static final int maxSearchResults = 10;
-	public static final int maxSearchDepth = 2;
+	public static final int maxSearchDepth = 3;
 	// Initial cleaning of the graph
 	public static final int maxPathLength = maxSearchDepth;
 	public static final int maxPathExtensionLength = 1;
 	// Heuristics
 	public static final int numRelevantNodesFilter = 10;
 	public static final int minSupportNodesFilter = 5;
-	// Automated Evaluation
-	public final static String outputFolder = "C:\\Users\\Chris\\Desktop\\test\\";
 	
 	// keyWords
 	public static final ArrayList<LinkedList<String>> keywordList = new ArrayList<LinkedList<String>>();
@@ -101,65 +97,11 @@ public class MainClass {
 	 */
 	public static void main(String[] args) {
 		// a) Search for concepts
-//		LinkedList<String> keywords = keywordList.get(0);
-//		WTPGraph g = processKeyWords(keywords);
-//		System.out.println(keywords);
-//		g.display();
-//		System.out.println("Done");
-		
-		// a) testing
-		doTests();
-	}
-	
-	protected static void doTests() {
-		// parameters
-		final int keywordListIdx = 3;
-		final int maxNumKeywords = 6;
-		final int minNumKeywords = 3;
-		final boolean skipIfExists = true;
-		
-		// initalize
-		final LinkedList<String> keywords = keywordList.get(keywordListIdx);
-		final String[] arr = keywords.toArray(new String[keywords.size()]);
-		// iterate power set
-		final int maxNumKWs = Math.min(maxNumKeywords, keywords.size());
-		final int minNumKWs = Math.min(minNumKeywords, keywords.size());
-		
-		// run all combinations
-		for (int i = maxNumKWs; i > minNumKWs; i--) {
-			PowerSetGenerator<String> psg = new PowerSetGenerator<String>(i, arr);
-			// iterate all powersets with k = i
-			for(String[] l : psg) {
-				// create filename
-				final String path = keywordListIdx + " (" + keywords.get(0) + "..." + keywords.getLast() + ")\\" +
-						"Search Depth = " + maxSearchDepth + "\\" +
-						i + " keywords\\" +
-						Arrays.toString(l) + ".png";
-				final String file = outputFolder + path;
-				
-				// chek if this file already exists
-				if (skipIfExists && new File(file).exists()) {
-					System.out.println("File already exists: " + path);
-					continue;
-				}
-				
-				// generate fingerprint
-				WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(l)));
-				
-				// save to iamge
-				System.out.println("Saving graph to file \"" + path + "\"");
-				g.displaySaveClose(file);
-//				try {
-//					g.saveToSVG(file);
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//					return;
-//				}
-				
-			}
-		}
-		System.out.println("Finished test run.");
-		System.exit(0);
+		LinkedList<String> keywords = keywordList.get(0);
+		WTPGraph g = processKeyWords(keywords);
+		System.out.println(keywords);
+		g.display();
+		System.out.println("Done");
 	}
 	
 	/**
@@ -207,10 +149,10 @@ public class MainClass {
 		
 		
 		// -- 4) tidy graph
-		System.out.print("Tidying graph (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges) ...");
+		System.out.print("Tidying graph (" + graph.getNodeCount() + " Nodes, " + graph.getEdgeCount() +" Edges) ...");
 		GraphCleaner c = new GraphCleaner(graph.getGraph(), res.requestNodes);
 		LinkedList<Path> paths = c.clean(maxPathLength, maxPathExtensionLength);
-		System.out.println(" Done (" + graph.getGraph().getNodeCount() + " Nodes, " + graph.getGraph().getEdgeCount()+" Edges, "+ paths.size() +" Paths)");
+		System.out.println(" Done (" + graph.getNodeCount() + " Nodes, " + graph.getEdgeCount()+" Edges, "+ paths.size() +" Paths)");
 		
 		// --4.2) heuristics finger print selection
 		InterConceptConntecting heuristic = new InterConceptConntecting();
