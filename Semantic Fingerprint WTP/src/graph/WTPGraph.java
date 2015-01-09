@@ -111,6 +111,14 @@ public class WTPGraph {
 		this.display(true);
 	}
 	
+	public int getNodeCount() {
+		return graph.getNodeCount();
+	}
+	
+	public int getEdgeCount() {
+		return graph.getEdgeCount();
+	}
+	
 	/**
 	 * 
 	 */

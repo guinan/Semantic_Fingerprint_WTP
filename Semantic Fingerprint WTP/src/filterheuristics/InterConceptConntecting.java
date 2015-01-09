@@ -119,7 +119,7 @@ public class InterConceptConntecting {
 			}	
 		}
 		Set<Node> dyingNodes = new HashSet<Node>();
-		for(Node n : graph.getGraph().getNodeSet()){
+		for(Node n : graph.getGraph().getNodeSet()) {
 			if(!survivingNodes.contains(n.getId()))
 				dyingNodes.add(n);
 		}
