@@ -65,6 +65,8 @@ public class StatsGenerator extends MainClass {
 					// generate fingerprint
 					WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(keywordArr)));
 					// write stats
+					out.write(Integer.toString(keywordArr.length));
+					out.write('\t');
 					out.write(Arrays.toString(keywordArr));
 					out.write('\t');
 					out.write(Integer.toString(g.getNodeCount()));
