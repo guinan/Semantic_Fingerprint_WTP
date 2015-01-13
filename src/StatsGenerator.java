@@ -98,7 +98,7 @@ public class StatsGenerator extends MainClass {
 		int num = 0;
 		for (Node n : g1.getGraph().getNodeSet()) {
 			for (Node n2 : g2.getGraph().getNodeSet()) {
-				if (n.equals(n2)) {
+				if (n.getId().equals(n2.getId())) {
 					num++;
 				}
 			}
@@ -114,9 +114,10 @@ public class StatsGenerator extends MainClass {
 	 */
 	public static int getNumIntersectingEdges(WTPGraph g1, WTPGraph g2) {
 		int num = 0;
-		for (Edge n : g1.getGraph().getEdgeSet()) {
-			for (Edge n2 : g2.getGraph().getEdgeSet()) {
-				if (n.equals(n2)) {
+		for (Edge e : g1.getGraph().getEdgeSet()) {
+			for (Edge e2 : g2.getGraph().getEdgeSet()) {
+				if (e.getSourceNode().getId().equals(e2.getSourceNode().getId()) &&
+					e.getTargetNode().getId().equals(e2.getTargetNode().getId())) {
 					num++;
 				}
 			}
