@@ -66,16 +66,18 @@ public class StatsGenerator extends MainClass {
 					WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(keywordArr)));
 					// write stats
 					out.write(Arrays.toString(keywordArr));
-					out.write("\t");
-					out.write(g.getNodeCount());
-					out.write("\t");
-					out.write(g.getEdgeCount());
-					out.write("\t");
-					out.write(getNumIntersectingNodes(maxGraph, g));
-					out.write("\t");
-					out.write(getNumIntersectingEdges(maxGraph, g));
+					out.write('\t');
+					out.write(Integer.toString(g.getNodeCount()));
+					out.write('\t');
+					out.write(Integer.toString(g.getEdgeCount()));
+					out.write('\t');
+					out.write(Integer.toString(getNumIntersectingNodes(maxGraph, g)));
+					out.write('\t');
+					out.write(Integer.toString(getNumIntersectingEdges(maxGraph, g)));
 					// TODO: add more to the output
-					out.write("\n");
+					//out.write('\n');
+					out.printf("%n");
+					out.flush();
 				}
 			}
 		} finally {
