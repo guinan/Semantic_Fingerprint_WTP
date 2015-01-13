@@ -6,6 +6,9 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Node;
+
 import utils.PowerSetGenerator;
 
 
@@ -49,6 +52,9 @@ public class StatsGenerator extends MainClass {
 		final int maxNumKWs = Math.min(maxNumKeywords, keywords.size());
 		final int minNumKWs = Math.min(minNumKeywords, keywords.size());
 		
+		// calculate the graph with all keywords
+		WTPGraph maxGraph = processKeyWords(keywords);
+		
 		// run all combinations
 		PrintWriter out = new PrintWriter(fileName);
 		try {
@@ -64,6 +70,10 @@ public class StatsGenerator extends MainClass {
 					out.write(g.getNodeCount());
 					out.write("\t");
 					out.write(g.getEdgeCount());
+					out.write("\t");
+					out.write(getNumIntersectingNodes(maxGraph, g));
+					out.write("\t");
+					out.write(getNumIntersectingEdges(maxGraph, g));
 					// TODO: add more to the output
 					out.write("\n");
 				}
@@ -73,5 +83,42 @@ public class StatsGenerator extends MainClass {
 		}
 		System.out.println("Finished test run.");
 		System.exit(0);
+	}
+	
+	
+	/**
+	 * 
+	 * @param g1
+	 * @param g2
+	 * @return 
+	 */
+	public static int getNumIntersectingNodes(WTPGraph g1, WTPGraph g2) {
+		int num = 0;
+		for (Node n : g1.getGraph().getNodeSet()) {
+			for (Node n2 : g2.getGraph().getNodeSet()) {
+				if (n.equals(n2)) {
+					num++;
+				}
+			}
+		}
+		return num;
+	}
+	
+	/**
+	 * 
+	 * @param g1
+	 * @param g2
+	 * @return
+	 */
+	public static int getNumIntersectingEdges(WTPGraph g1, WTPGraph g2) {
+		int num = 0;
+		for (Edge n : g1.getGraph().getEdgeSet()) {
+			for (Edge n2 : g2.getGraph().getEdgeSet()) {
+				if (n.equals(n2)) {
+					num++;
+				}
+			}
+		}
+		return num;
 	}
 }
