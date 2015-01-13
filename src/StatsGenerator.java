@@ -70,10 +70,18 @@ public class StatsGenerator extends MainClass {
 					out.write(Integer.toString(g.getNodeCount()));
 					out.write('\t');
 					out.write(Integer.toString(g.getEdgeCount()));
+					// add intersection
 					out.write('\t');
-					out.write(Integer.toString(getNumIntersectingNodes(maxGraph, g)));
+					final int numNodeInter = getNumIntersectingNodes(maxGraph, g);
+					out.write(Integer.toString(numNodeInter));
 					out.write('\t');
-					out.write(Integer.toString(getNumIntersectingEdges(maxGraph, g)));
+					final int numEdgeInter = getNumIntersectingEdges(maxGraph, g);
+					out.write(Integer.toString(numEdgeInter));
+					// how many edges are missing to be equal to the max graph (negative value => we have more nodes/egdes in the small keywordlist)
+					out.write('\t');
+					out.write(Integer.toString(maxGraph.getNodeCount() - numNodeInter));
+					out.write('\t');
+					out.write(Integer.toString(maxGraph.getEdgeCount() - numEdgeInter));
 					// TODO: add more to the output
 					//out.write('\n');
 					out.printf("%n");
