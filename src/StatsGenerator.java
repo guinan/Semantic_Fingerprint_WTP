@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
@@ -34,7 +35,7 @@ public class StatsGenerator extends MainClass {
 	 */
 	protected static void doTests() throws FileNotFoundException {
 		// parameters
-		final int keywordListIdx = 4;
+		final int keywordListIdx = 3;
 		final int maxNumKeywords = 8;
 		final int minNumKeywords = 4;
 		final boolean skipIfExists = true;
@@ -68,8 +69,10 @@ public class StatsGenerator extends MainClass {
 			out.write(Integer.toString(maxGraph.getNodeCount()));
 			out.write('\t');
 			out.write(Integer.toString(maxGraph.getEdgeCount()));
+			out.write('\t');
+			out.write(getNodeNames(maxGraph).toString());
 			out.printf("%n----------- The subsets of the keywordlist generate the following ---------- %n");
-			out.printf("#keywords\tkeywords\t#nodes\t#edges\t#intersectedNodes\t#intersectedEdges\t#missingNodes\t#missingEdges%n");
+			out.printf("#keywords\tkeywords\t#nodes\t#edges\t#intersectedNodes\t#intersectedEdges\t#missingNodes\t#missingEdges\tnodesOfResultingGraph%n");
 			// run all combination
 			for (int i = maxNumKWs; i >= minNumKWs; i--) {
 				PowerSetGenerator<String> psg = new PowerSetGenerator<String>(i, arr);
@@ -97,6 +100,8 @@ public class StatsGenerator extends MainClass {
 					out.write(Integer.toString(maxGraph.getNodeCount() - numNodeInter));
 					out.write('\t');
 					out.write(Integer.toString(maxGraph.getEdgeCount() - numEdgeInter));
+					out.write('\t');
+					out.write(getNodeNames(g).toString());
 					// TODO: add more to the output
 					//out.write('\n');
 					out.printf("%n");
@@ -108,6 +113,19 @@ public class StatsGenerator extends MainClass {
 		}
 		System.out.println("Finished test run.");
 		System.exit(0);
+	}
+	
+	/**
+	 * 
+	 * @param g
+	 * @return
+	 */
+	public static List<String> getNodeNames(WTPGraph g) {
+		List<String> nodes = new LinkedList<String>();
+		for (Node n : g.getGraph().getNodeSet()) {
+			nodes.add(n.getId());
+		}
+		return nodes;	
 	}
 	
 	
