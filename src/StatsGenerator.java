@@ -34,9 +34,9 @@ public class StatsGenerator extends MainClass {
 	 */
 	protected static void doTests() throws FileNotFoundException {
 		// parameters
-		final int keywordListIdx = 3;
-		final int maxNumKeywords = 7;
-		final int minNumKeywords = 3;
+		final int keywordListIdx = 4;
+		final int maxNumKeywords = 8;
+		final int minNumKeywords = 4;
 		final boolean skipIfExists = true;
 		
 		// start
@@ -59,7 +59,7 @@ public class StatsGenerator extends MainClass {
 		
 		try {
 			// write information about the full graph
-			out.printf("-- Format: #keywords, keywords, #nodes, #edges, #intersectionNodes, #intersectionEdges, #missingNodes, #missingEdes (if the two last are negative the certain graph is bigger than the graph generated with the fill keywordlist)%n");
+			out.printf("-- Format: #keywords, keywords, #nodes, #edges, #intersectedNodes, #intersectedEdges, #missingNodes, #missingEdges (if the two last are negative the certain graph is bigger than the graph generated with the fill keywordlist)%n");
 			out.printf("-- The maximal graph gives the following output:%n");
 			out.write(Integer.toString(keywords.size()));
 			out.write('\t');
@@ -69,9 +69,9 @@ public class StatsGenerator extends MainClass {
 			out.write('\t');
 			out.write(Integer.toString(maxGraph.getEdgeCount()));
 			out.printf("%n----------- The subsets of the keywordlist generate the following ---------- %n");
-		
+			out.printf("#keywords\tkeywords\t#nodes\t#edges\t#intersectedNodes\t#intersectedEdges\t#missingNodes\t#missingEdges%n");
 			// run all combination
-			for (int i = maxNumKWs; i > minNumKWs; i--) {
+			for (int i = maxNumKWs; i >= minNumKWs; i--) {
 				PowerSetGenerator<String> psg = new PowerSetGenerator<String>(i, arr);
 				// iterate all powersets with k = i
 				for(String[] keywordArr : psg) {

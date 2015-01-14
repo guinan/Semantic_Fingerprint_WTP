@@ -301,6 +301,16 @@ public class BreadthFirstSearch {
 			readFromCache++;
 		} else { // load from DBPedia online
 			requestedOnline++;
+			if (requestedOnline % 40 == 0) {
+				try {
+					final int sleepMillis = 60000;
+					System.out.println("Waiting 60 seconds to not be banished from the DBPedia server");
+					Thread.sleep(sleepMillis);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			System.out.println("Analysing node: " + resource.resourceURI);
 			//System.out.print("Loading data from DBPedia...");
 			cachedNode = new AnalysedNode();
