@@ -35,10 +35,13 @@ public class StatsGenerator extends MainClass {
 	 */
 	protected static void doTests() throws FileNotFoundException {
 		// parameters
-		final int keywordListIdx = 3;
-		final int maxNumKeywords = 8;
-		final int minNumKeywords = 4;
+		final int keywordListIdx = 1;
+//		final int maxNumKeywords = 7;
+//		final int minNumKeywords = 4;
 		final boolean skipIfExists = true;
+		
+		// define the upper bounds of the buckets (including) in percent
+		final int[] upperBounds = {40, 65, 90, 999999};
 		
 		// start
 		final String fileName = outputFolder + "evaluation_list_" + keywordListIdx + ".txt";
@@ -47,15 +50,24 @@ public class StatsGenerator extends MainClass {
 		}
 		
 		// initalize
+		
 		final LinkedList<String> keywords = keywordList.get(keywordListIdx);
 		final String[] arr = keywords.toArray(new String[keywords.size()]);
 		// iterate power set
-		final int maxNumKWs = Math.min(maxNumKeywords, keywords.size());
-		final int minNumKWs = Math.min(minNumKeywords, keywords.size());
+		final int maxNumKWs = keywords.size()-1;
+		final int minNumKWs = Math.min(keywords.size()-4, 4); // down to max-4 but not lower than 4
 		
 		// calculate the graph with all keywords
 		WTPGraph maxGraph = processKeyWords(keywords);
+		final double numNodesMax = maxGraph.getNodeCount();
 		
+		// initialize buckets
+		final int[][] bucketSizes = new int[maxNumKWs - minNumKWs + 1][];
+		for (int i = 0; i < bucketSizes.length; i++) {
+			bucketSizes[i] = new int[upperBounds.length];
+		}
+		
+		// start calculating
 		PrintWriter out = new PrintWriter(fileName);
 		
 		try {
@@ -80,12 +92,22 @@ public class StatsGenerator extends MainClass {
 				for(String[] keywordArr : psg) {
 					// generate fingerprint
 					WTPGraph g = processKeyWords(new LinkedList<String>(Arrays.asList(keywordArr)));
+					
+					// sort into bucket
+					int bucketIdx = 0;
+					final double nodeCount = g.getNodeCount();
+					final double percent = nodeCount / numNodesMax * 100.0;
+					while (percent >= upperBounds[bucketIdx]) {
+						bucketIdx++;
+					}
+					bucketSizes[i-minNumKWs][bucketIdx]++;
+					
 					// write stats
 					out.write(Integer.toString(keywordArr.length));
 					out.write('\t');
 					out.write(Arrays.toString(keywordArr));
 					out.write('\t');
-					out.write(Integer.toString(g.getNodeCount()));
+					out.write(Integer.toString((int)nodeCount));
 					out.write('\t');
 					out.write(Integer.toString(g.getEdgeCount()));
 					// add intersection
@@ -105,13 +127,31 @@ public class StatsGenerator extends MainClass {
 					// TODO: add more to the output
 					//out.write('\n');
 					out.printf("%n");
-					out.flush();
+					//out.flush();
 				}
 			}
 		} finally {
 			out.close();
 		}
 		System.out.println("Finished test run.");
+		
+		// print bucket sizes
+		System.out.println("\nBuckets up to percent:");
+		for(int i = upperBounds.length-1; i >= 0; i--) {
+			System.out.print(upperBounds[i] + "\t");
+		}
+		System.out.println("\n");
+		
+		for (int kwSize = bucketSizes.length-1; kwSize >= 0; kwSize--) {
+			System.out.println("Bucket distribution for #keywords = " + (kwSize + minNumKWs));
+			for(int i = bucketSizes[kwSize].length-1; i >= 0; i--) {
+				System.out.print(bucketSizes[kwSize][i] + "\t");
+			}
+			System.out.println();
+		}
+		System.out.println();
+		
+		
 		System.exit(0);
 	}
 	

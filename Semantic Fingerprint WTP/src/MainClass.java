@@ -36,35 +36,9 @@ public class MainClass {
 	// keyWords
 	public static final ArrayList<LinkedList<String>> keywordList = new ArrayList<LinkedList<String>>();
 	
+	// These indices should match the ones in the textfile
 	static {
 		// keywords 0
-		addKeywords(new String[] {
-				"Haskell",
-				"induction",
-				"foldr",
-				"fold",
-				"higher order function",
-				"prove"
-			});
-		
-		// keywords 1
-		addKeywords(new String[] {
-				"Götz_Alsmann",
-				"University_of_Münster",
-				"Jazz",
-				"Brandenburger-Tor",
-				"Hauptstadt"
-			});
-	
-		// keywords 2
-		addKeywords(new String[] {
-				"NP complete",
-				"NP",
-				"computer science",
-				"theory"
-		});
-		
-		// keywords 3
 		addKeywords(new String[] {
 				"Haskell",
 				"span",
@@ -76,7 +50,7 @@ public class MainClass {
 				"properties"
 		});
 		
-		// keywords 4
+		// keywords 1
 		addKeywords(new String[] {
 				"scheduling",
 				"simulated annealing",
@@ -87,6 +61,17 @@ public class MainClass {
 				"local search",
 				"hybrid algorithms"
 		});
+		
+//		// keywords x
+//		addKeywords(new String[] {
+//				"programming",
+//				"evolution",
+//				"mutation",
+//				"generation",
+//				"fitness function",
+//				"individual",
+//				"crossover"
+//		});
 	}
 	
 	
