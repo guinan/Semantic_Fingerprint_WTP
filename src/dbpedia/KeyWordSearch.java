@@ -25,7 +25,7 @@ import connector.SparqlQueryExecuter;
 public class KeyWordSearch {
 	private final int defaultMaxResultSize = 10;
 	
-	private final SparqlQueryExecuter queryExecuter = new DBPediaEndpoint();
+	protected final SparqlQueryExecuter queryExecuter = new DBPediaEndpoint();
 	public boolean useCaching = true;
 	
 	FileCache<SerializedResult> cache = new FileCache<SerializedResult>("KeyWordSearch");
@@ -33,11 +33,11 @@ public class KeyWordSearch {
 	/**
 	 * 
 	 */
-	private static class SerializedResult implements Serializable {
+	protected static class SerializedResult implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
 		private final ArrayList<SearchResult> searchResult;
-		private final int searchLimit;
+		protected final int searchLimit;
 		
 		public SerializedResult(ArrayList<SearchResult> searchResult, int searchLimit) {
 			this.searchLimit = searchLimit;
@@ -175,7 +175,7 @@ public class KeyWordSearch {
 	 * @param limit
 	 * @return
 	 */
-	private String createQueryString(String keyword, int limit) {
+	protected String createQueryString(String keyword, int limit) {
 		StringBuilder st = new StringBuilder();
 		st.append("SELECT ?s ?l (count(?s) as ?count) ");
 		//st.append("GRAPH :http://dbpedia.org ");

@@ -2,6 +2,8 @@ package dbpedia;
 
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -82,7 +84,8 @@ public class BreadthFirstSearch {
 		 */
 		public String resourceName() {
 			final int idx = "http://dbpedia.org/resource/".length();
-			return resourceURI.substring(idx).replace("_", " ");
+			//return resourceURI.substring(idx).replace("_", " ");
+			return resourceURI;
 		}
 	}
 	
@@ -109,7 +112,8 @@ public class BreadthFirstSearch {
 
 		public Object getName() {
 			final int idx = "http://dbpedia.org/property/".length();
-			return connectionName.substring(idx).replace("_", " ");
+			//return connectionName.substring(idx).replace("_", " ");
+			return connectionName;
 		}
 		
 		public String getID() {
@@ -317,6 +321,13 @@ public class BreadthFirstSearch {
 			
 			// request with sparql
 			String query = createQueryString(resource.resourceURI);
+			/*try{
+				query=URLEncoder.encode(query,"utf-8");
+			}
+			catch(UnsupportedEncodingException e){
+				System.err.println(e.getMessage());
+			}*/
+			//System.out.println(query);
 			//System.out.println(query);
 			List<QuerySolution> resultSet = queryExecuter.executeQuery(query);
 			
