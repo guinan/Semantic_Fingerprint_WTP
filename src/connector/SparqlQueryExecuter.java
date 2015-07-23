@@ -31,7 +31,7 @@ public class SparqlQueryExecuter {
 	public List<QuerySolution> executeQuery(String queryString) {
 		Query query = QueryFactory.create(queryString);
 		QueryExecution qexec = QueryExecutionFactory.sparqlService(endpointURL, query);
-		
+		System.out.println("sparql endpoint: "+endpointURL);
 		ResultSet results = qexec.execSelect();
 		
 		// collect results

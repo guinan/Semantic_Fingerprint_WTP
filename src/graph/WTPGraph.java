@@ -26,6 +26,11 @@ import org.graphstream.ui.swingViewer.Viewer;
 import org.graphstream.ui.swingViewer.Viewer.CloseFramePolicy;
 
 import utils.OccurenceCounter;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
+
 import dbpedia.BreadthFirstSearch.ResultSet;
 
 /**
@@ -438,5 +443,23 @@ public class WTPGraph {
 			}
 		}
 		return graph;
+	}
+	
+	public static Model getRDFGraph(WTPGraph graph){
+		Model rdfmodel = ModelFactory.createDefaultModel();
+		//iterate over all nodes and extract triples
+		System.out.println("gen rdf graph");
+		for(Node n : graph.getGraph().getEachNode()){
+			System.out.println("outer node loop");
+			//get corresponding predicates and objects
+			for (Edge e : graph.getGraph().getEachEdge()){
+				if(e.getNode0().getId().equals(n.getId())){
+					System.out.println("Adding triple S["+n.getId()+"] P["+e.getId()+"] O["+e.getNode1().getId());
+					rdfmodel.createResource(n.getId())
+							.addProperty(ResourceFactory.createProperty(e.getId()), e.getNode1().getId());
+				}
+			}
+		}
+		return rdfmodel;
 	}
 }

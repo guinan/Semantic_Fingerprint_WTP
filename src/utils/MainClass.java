@@ -1,3 +1,4 @@
+package utils;
 import filterheuristics.InterConceptConntecting;
 import graph.GraphCleaner;
 import graph.GraphCleaner.ExtendedPath;
@@ -13,9 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.graphstream.graph.Graph;
-
-import utils.OccurenceCounter;
 import dbpedia.BreadthFirstSearch;
 import dbpedia.BreadthFirstSearch.ResultSet;
 import dbpedia.KeyWordSearch;
@@ -94,7 +92,7 @@ public class MainClass {
 	 * @param keywords
 	 * @return 
 	 */
-	protected static WTPGraph processKeyWords(LinkedList<String> keywords) {
+	public static WTPGraph processKeyWords(LinkedList<String> keywords) {
 		// map for the semantic concepts found in the ontology and their corresponding keyword, used for searching them
 		Map<String, String> correspondingKeywords = new HashMap<String, String>();
 		
@@ -187,7 +185,7 @@ public class MainClass {
 		System.out.println("Kurze Pfade: " + types[0]);
 		System.out.println("Erweiterte Pfade: " + types[1]);
 		System.out.println("Implizite Pfade: " + types[2]);
-		System.out.println("Pfadlängen: " + counter);
+		System.out.println("Pfadlï¿½ngen: " + counter);
 		
 		System.out.println("-- Displaying edge statistics");
 		OccurenceCounter<String> edgeStats = graph.getEdgeOccurences();
@@ -210,7 +208,7 @@ public class MainClass {
 	/**
 	 * Testgraph #1
 	 */
-	private static void generateTestGraph() {
+	/*private static void generateTestGraph() {
 		WTPGraph graph = new WTPGraph("Test");
 		
 		String[] arr = new String[] {
@@ -271,11 +269,11 @@ public class MainClass {
 		System.out.println(paths);
 		graph.display();
 	}
-	
+*/
 	/**
 	 * Testgraph #2
 	 */
-	private static void generateTestGraph_2() {
+	/*private static void generateTestGraph_2() {
 		WTPGraph graph = new WTPGraph("Test");
 		
 		String[] arr = new String[] {
@@ -314,5 +312,5 @@ public class MainClass {
 		
 //		System.out.println(paths);
 		graph.display();
-	}
+	}*/
 }
