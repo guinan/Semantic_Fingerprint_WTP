@@ -26,7 +26,7 @@ public class KeyWordSearch {
 	private final int defaultMaxResultSize = 10;
 	
 	protected final SparqlQueryExecuter queryExecuter = new DBPediaEndpoint();
-	public boolean useCaching = true;
+	public boolean useCaching = false;
 	
 	FileCache<SerializedResult> cache = new FileCache<SerializedResult>("KeyWordSearch");
 	

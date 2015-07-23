@@ -42,7 +42,7 @@ public class BreadthFirstSearch {
 	
 	private final SparqlQueryExecuter queryExecuter = new DBPediaEndpoint();
 	
-	public boolean useCaching = true;
+	public boolean useCaching = false;
 	
 	/**
 	 * 
@@ -301,7 +301,7 @@ public class BreadthFirstSearch {
 				Edge edge = new Edge(resource, cachedNode.edges.get(i), dest);
 				edges.add(edge);
 			}
-			//System.out.println("Loaded data from cache.");
+			System.out.println("Loaded data from cache.");
 			readFromCache++;
 		} else { // load from DBPedia online
 			requestedOnline++;
