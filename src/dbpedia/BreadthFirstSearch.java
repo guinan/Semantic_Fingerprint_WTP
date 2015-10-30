@@ -307,8 +307,8 @@ public class BreadthFirstSearch {
 			requestedOnline++;
 			if (requestedOnline % 40 == 0) {
 				try {
-					final int sleepMillis = 60000;
-					System.out.println("Waiting 60 seconds to not be banished from the DBPedia server");
+					final int sleepMillis = 1000;
+					System.out.println("Waiting 10 seconds to not be banished from the DBPedia server");
 					Thread.sleep(sleepMillis);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block

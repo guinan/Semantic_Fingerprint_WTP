@@ -44,4 +44,8 @@ public class SparqlQueryExecuter {
 		
 		return res;
 	}
+	
+	public String getEndpointURL(){
+		return this.endpointURL;
+	}
 }

@@ -211,6 +211,7 @@ public class InterConceptConntecting {
 		Set<String> interconnectedNodeIDs = new HashSet<String>();
 		// Write all nodeIDs included in at least one of the path into the interconnectedNodeIDs Set
 		for(Path p : paths){
+			System.out.println("Path: "+p.toString());
 			for(Node n : p){
 				interconnectedNodeIDs.add(n.getId());
 			}

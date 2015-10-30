@@ -3,9 +3,11 @@ package graph;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,6 +19,7 @@ import javax.imageio.ImageIO;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+//import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.stream.file.FileSink;
 import org.graphstream.stream.file.FileSinkSVG2;
@@ -29,7 +32,12 @@ import utils.OccurenceCounter;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import dbpedia.BreadthFirstSearch.ResultSet;
 
@@ -59,6 +67,7 @@ public class WTPGraph {
 		String path = getClass().getClassLoader().getResource(".").getPath();
 		graph.addAttribute("ui.stylesheet", "url('file://"+path+"../css/style.css')");
 	}
+	
 	
 	public Node addNode(String nodeId){
 		Node nodeTemp = graph.addNode(nodeId);
@@ -461,5 +470,30 @@ public class WTPGraph {
 			}
 		}
 		return rdfmodel;
+	}
+	
+	public static WTPGraph fromXML(String xmlsrc){
+		WTPGraph graph = new WTPGraph(null);
+		
+		InputStream is = new ByteArrayInputStream( xmlsrc.getBytes() );
+		Model rdfmodel = ModelFactory.createDefaultModel();
+		rdfmodel.read(is, null,"RDF/XML");
+		StmtIterator iter = rdfmodel.listStatements();
+		while (iter.hasNext())
+	    {
+			Statement stmt = iter.next();
+			String subject = stmt.getSubject().toString();
+			String predicate = stmt.getPredicate().toString();
+			String obj = stmt.getObject().toString();
+			
+			
+			if (!graph.getGraph().getNodeSet().contains(subject))
+				graph.addNode(subject);
+			if (!graph.getGraph().getNodeSet().contains(obj))
+				graph.addNode(obj);
+			graph.addEdge(predicate, subject, obj);
+	    }
+		
+		return graph;
 	}
 }
