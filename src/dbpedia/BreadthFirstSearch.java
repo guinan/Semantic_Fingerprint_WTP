@@ -42,7 +42,7 @@ public class BreadthFirstSearch {
 	
 	private final SparqlQueryExecuter queryExecuter = new DBPediaEndpoint();
 	
-	public boolean useCaching = false;
+	public boolean useCaching = true;
 	
 	/**
 	 * 

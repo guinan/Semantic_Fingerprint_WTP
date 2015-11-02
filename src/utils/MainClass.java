@@ -7,12 +7,16 @@ import graph.GraphCleaner.Path;
 import graph.WTPGraph;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import com.hp.hpl.jena.rdf.model.Model;
 
 import dbpedia.BreadthFirstSearch;
 import dbpedia.BreadthFirstSearch.ResultSet;
@@ -26,10 +30,10 @@ public class MainClass {
 	public static final int maxSearchDepth = 3;
 	// Initial cleaning of the graph
 	public static final int maxPathLength = maxSearchDepth;
-	public static final int maxPathExtensionLength = 1;
+	public static final int maxPathExtensionLength = 2;
 	// Heuristics
-	public static final int numRelevantNodesFilter = 10;
-	public static final int minSupportNodesFilter = 5;
+	public static final int numRelevantNodesFilter = 12;
+	public static final int minSupportNodesFilter = 6;
 	
 	// keyWords
 	public static final ArrayList<LinkedList<String>> keywordList = new ArrayList<LinkedList<String>>();
@@ -80,11 +84,31 @@ public class MainClass {
 	 */
 	public static void main(String[] args) {
 		// a) Search for concepts
-		LinkedList<String> keywords = keywordList.get(0);
+		LinkedList<String> keywords = keywordList.get(1);
 		WTPGraph g = processKeyWords(keywords);
 		System.out.println(keywords);
 		g.display();
+		System.out.println("Edges: "+g.getGraph().getEdgeCount());
 		System.out.println("Done");
+		Model rdfgraph = g.getRDFGraph(g);
+		rdfgraph.write(System.out);
+		//and back again
+		/*OutputStream output = new OutputStream() {
+			private StringBuilder string = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				this.string.append((char) b);
+			}
+
+			public String toString() {
+				return this.string.toString();
+			}
+		};
+		rdfgraph.write((OutputStream) output);
+		WTPGraph g2 = WTPGraph.fromXML(output.toString());
+		System.out.println("Edges: "+g2.getGraph().getEdgeCount());
+		g2.display();*/
 	}
 	
 	/**
@@ -143,12 +167,12 @@ public class MainClass {
 		/**
 		 * Filters all Nodes that have paths to other Nodes which correspond to a different keyword
 		 */
-		heuristic.filterInterconntection(graph, paths, correspondingKeywords);
+		//heuristic.filterInterconntection(graph, paths, correspondingKeywords);
 		
 		/**
 		 * Filters the n Nodes which occur most frequently in the paths
 		 */
-		//heuristic.filterNMostFrequentlyOccuring(graph, paths, numRelevantNodesFilter, correspondingKeywords);
+		heuristic.filterNMostFrequentlyOccuring(graph, paths, numRelevantNodesFilter, correspondingKeywords);
 		
 		/**
 		 *  Selects the cluster which corresponds to the most different keywords
@@ -163,7 +187,7 @@ public class MainClass {
 		/**
 		 * Selects the cluster whose nodes occur most frequently in the paths
 		 */
-		//heuristic.filterClusterByNodeOccurrencesInPaths(graph, paths);
+		heuristic.filterClusterByNodeOccurrencesInPaths(graph, paths);
 		
 		// --4.3) colorize Graph
 		
