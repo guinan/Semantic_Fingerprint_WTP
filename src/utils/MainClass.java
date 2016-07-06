@@ -1,14 +1,5 @@
 package utils;
-import filterheuristics.InterConceptConntecting;
-import graph.GraphCleaner;
-import graph.GraphCleaner.ExtendedPath;
-import graph.GraphCleaner.ImplicitPath;
-import graph.GraphCleaner.Path;
-import graph.WTPGraph;
-
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,12 +7,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 
 import dbpedia.BreadthFirstSearch;
 import dbpedia.BreadthFirstSearch.ResultSet;
 import dbpedia.KeyWordSearch;
 import dbpedia.KeyWordSearch.SearchResult;
+import filterheuristics.InterConceptConntecting;
+import graph.GraphCleaner;
+import graph.GraphCleaner.ExtendedPath;
+import graph.GraphCleaner.ImplicitPath;
+import graph.GraphCleaner.Path;
+import graph.WTPGraph;
 
 
 public class MainClass {

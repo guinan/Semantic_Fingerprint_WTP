@@ -15,31 +15,24 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
-//import org.graphstream.graph.Node;
-import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.stream.file.FileSink;
 import org.graphstream.stream.file.FileSinkSVG2;
 import org.graphstream.ui.layout.springbox.implementations.SpringBox;
-import org.graphstream.ui.swingViewer.View;
-import org.graphstream.ui.swingViewer.Viewer;
-import org.graphstream.ui.swingViewer.Viewer.CloseFramePolicy;
-
-import utils.OccurenceCounter;
-
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
+import org.graphstream.ui.swingViewer.DefaultView;
+import org.graphstream.ui.view.Viewer;
 
 import dbpedia.BreadthFirstSearch.ResultSet;
+import utils.OccurenceCounter;
 
 /**
  * Wrapper class for a graph.
@@ -133,8 +126,8 @@ public class WTPGraph {
 	public void display(boolean exitOnClose) {
 		Viewer viewer = graph.display(true);
 		if (!exitOnClose)
-			viewer.setCloseFramePolicy(CloseFramePolicy.CLOSE_VIEWER);
-		View view = viewer.getDefaultView();
+			viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+		DefaultView view = (DefaultView) viewer.getDefaultView();
 		view.resizeFrame(1024, 800);
 
 		// view.setViewCenter(440000, 2503000, 0);
@@ -148,8 +141,8 @@ public class WTPGraph {
 	 */
 	public void displaySaveClose(String file) {
 		Viewer viewer = graph.display(true);
-		viewer.setCloseFramePolicy(CloseFramePolicy.CLOSE_VIEWER);
-		View view = viewer.getDefaultView();
+		viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+		DefaultView view = (DefaultView) viewer.getDefaultView();
 		view.resizeFrame(1024, 800);
 
 		try {

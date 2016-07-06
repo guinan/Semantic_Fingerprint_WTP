@@ -9,8 +9,8 @@ import java.util.Map;
 
 import utils.FileCache;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.rdf.model.RDFNode;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.rdf.model.RDFNode;
 
 import connector.DBPediaEndpoint;
 import connector.SparqlQueryExecuter;

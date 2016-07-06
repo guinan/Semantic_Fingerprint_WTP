@@ -2,8 +2,6 @@ package dbpedia;
 
 import java.io.PrintStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,13 +9,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import utils.FileCache;
-
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.rdf.model.RDFNode;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.rdf.model.RDFNode;
 
 import connector.DBPediaEndpoint;
 import connector.SparqlQueryExecuter;
+import utils.FileCache;
 
 /**
  * Performs a BreadthFirstSearch on DBPedia concepts.
