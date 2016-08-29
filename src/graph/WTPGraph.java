@@ -28,8 +28,6 @@ import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSink;
 import org.graphstream.stream.file.FileSinkSVG2;
 import org.graphstream.ui.layout.springbox.implementations.SpringBox;
-import org.graphstream.ui.swingViewer.DefaultView;
-import org.graphstream.ui.view.Viewer;
 
 import dbpedia.BreadthFirstSearch.ResultSet;
 import utils.OccurenceCounter;
